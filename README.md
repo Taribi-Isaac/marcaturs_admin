@@ -62,7 +62,16 @@ Use seeded Admin emails from `backend/docs/development-seed.md`. Do not commit c
 - Non-Admin users receive Access denied
 - Session restore on refresh via cookie + `/auth/me`
 
-Domain modules remain placeholders.
+## Attention (MH-FE-004)
+
+`/attention` composes four Admin list APIs into operational queues:
+
+- Verification (`pending`, `under_review`)
+- Campaign moderation (`submitted`)
+- Disputes (open statuses, client-filtered)
+- Reported conversations (read-only list)
+
+Other domain modules remain placeholders.
 
 ## Related
 

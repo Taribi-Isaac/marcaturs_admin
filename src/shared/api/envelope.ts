@@ -1,15 +1,17 @@
+export type PaginationMeta = {
+  current_page: number
+  per_page: number
+  total: number
+  last_page: number
+  from: number | null
+  to: number | null
+}
+
 export type ApiSuccessEnvelope<T> = {
   success: true
   data: T
   meta?: {
-    pagination?: {
-      current_page: number
-      per_page: number
-      total: number
-      last_page: number
-      from: number | null
-      to: number | null
-    }
+    pagination?: PaginationMeta
   }
 }
 

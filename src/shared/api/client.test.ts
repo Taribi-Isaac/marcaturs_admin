@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { http, HttpResponse } from 'msw'
-import { apiRequest, ApiClientError, mapHttpStatusToCode } from '@/shared/api'
+import { apiRequest, apiRequestResult, ApiClientError, mapHttpStatusToCode } from '@/shared/api'
 import { server } from '@/test/setup'
 
 describe('API client', () => {
@@ -12,6 +12,32 @@ describe('API client', () => {
     )
 
     await expect(apiRequest<{ ok: boolean }>('/health-check')).resolves.toEqual({ ok: true })
+  })
+
+  it('preserves pagination meta via apiRequestResult', async () => {
+    server.use(
+      http.get('/api/v1/paged', () =>
+        HttpResponse.json({
+          success: true,
+          data: [{ id: 1 }],
+          meta: {
+            pagination: {
+              current_page: 1,
+              per_page: 15,
+              total: 1,
+              last_page: 1,
+              from: 1,
+              to: 1,
+            },
+          },
+        }),
+      ),
+    )
+
+    await expect(apiRequestResult<{ id: number }[]>('/paged')).resolves.toMatchObject({
+      data: [{ id: 1 }],
+      meta: { pagination: { total: 1, last_page: 1 } },
+    })
   })
 
   it('maps 401 error envelopes', async () => {

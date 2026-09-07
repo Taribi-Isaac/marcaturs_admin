@@ -1,5 +1,5 @@
 import { appConfig } from '@/app/config/env'
-import type { ApiEnvelope, ApiErrorCode } from './envelope'
+import type { ApiEnvelope, ApiErrorCode, ApiSuccessEnvelope } from './envelope'
 import { ApiClientError, mapHttpStatusToCode } from './errors'
 import { ensureCsrfCookie, readXsrfToken } from './csrf'
 import { notifyUnauthorized } from './sessionEvents'
@@ -23,11 +23,27 @@ export type RequestOptions = {
   notifyOnUnauthorized?: boolean
 }
 
+export type ApiRequestResult<T> = {
+  data: T
+  meta?: ApiSuccessEnvelope<T>['meta']
+}
+
 /**
  * Thin HTTP transport for the Laravel `/api/v1` envelope.
  * Uses credentialed cookies for Sanctum SPA session auth.
  */
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const result = await apiRequestResult<T>(path, options)
+  return result.data
+}
+
+/**
+ * Same as `apiRequest`, but preserves envelope `meta` (pagination totals, etc.).
+ */
+export async function apiRequestResult<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<ApiRequestResult<T>> {
   const method = options.method ?? 'GET'
   const notifyOnUnauthorized = options.notifyOnUnauthorized ?? true
 
@@ -102,7 +118,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     })
   }
 
-  return payload.data
+  return {
+    data: payload.data,
+    meta: payload.meta,
+  }
 }
 
 function isMutatingMethod(method: HttpMethod): boolean {

@@ -1,6 +1,12 @@
-export { apiRequest } from './client'
-export type { HttpMethod, RequestOptions } from './client'
-export type { ApiEnvelope, ApiErrorEnvelope, ApiSuccessEnvelope, ApiErrorCode } from './envelope'
+export { apiRequest, apiRequestResult } from './client'
+export type { HttpMethod, RequestOptions, ApiRequestResult } from './client'
+export type {
+  ApiEnvelope,
+  ApiErrorEnvelope,
+  ApiSuccessEnvelope,
+  ApiErrorCode,
+  PaginationMeta,
+} from './envelope'
 export { ApiClientError, mapHttpStatusToCode } from './errors'
 export { ensureCsrfCookie, readXsrfToken } from './csrf'
 export { onUnauthorized, notifyUnauthorized } from './sessionEvents'
