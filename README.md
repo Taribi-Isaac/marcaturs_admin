@@ -8,8 +8,8 @@ Phase-1 Admin operations console (`adminControl/`).
 - Vite
 - React Router
 - TanStack Query
-- React Hook Form + Zod (installed for later forms)
-- Vitest + Testing Library
+- React Hook Form + Zod
+- Vitest + Testing Library + MSW
 - Playwright (foundation only)
 - ESLint + Prettier
 
@@ -21,37 +21,48 @@ npm install
 npm run dev
 ```
 
-App runs at `http://127.0.0.1:5174`.
+App: `http://localhost:5174` (use the `localhost` host — not `127.0.0.1` — so `SESSION_DOMAIN=localhost` cookies apply).
 
-API base URL:
+### API / Sanctum
+
+Local development uses a **Vite proxy** so Sanctum cookies stay same-origin:
 
 ```text
-VITE_API_BASE_URL=http://localhost:8000/api/v1
+VITE_API_BASE_URL=/api/v1
+VITE_BACKEND_ORIGIN=http://localhost:8000
 ```
+
+Vite proxies `/api` and `/sanctum` to the Laravel origin and rewrites `Origin`/`Referer` to `http://localhost:3000` (already listed in backend `SANCTUM_STATEFUL_DOMAINS`) so SPA session middleware applies without changing backend env. The SPA calls `GET /sanctum/csrf-cookie` before mutating requests and sends `X-XSRF-TOKEN`.
+
+Start the backend separately (`php artisan serve`) and seed demo data:
+
+```bash
+cd ../backend
+php artisan marcaturs:seed-demo
+```
+
+Use seeded Admin emails from `backend/docs/development-seed.md`. Do not commit credentials.
 
 ## Scripts
 
-| Script              | Purpose                                |
-| ------------------- | -------------------------------------- |
-| `npm run dev`       | Dev server                             |
-| `npm run build`     | Production build                       |
-| `npm run typecheck` | TypeScript project references check    |
-| `npm run lint`      | ESLint                                 |
-| `npm run format`    | Prettier write                         |
-| `npm test`          | Vitest                                 |
-| `npm run test:e2e`  | Playwright (placeholder suite skipped) |
+| Script              | Purpose                  |
+| ------------------- | ------------------------ |
+| `npm run dev`       | Dev server               |
+| `npm run build`     | Production build         |
+| `npm run typecheck` | TypeScript check         |
+| `npm run lint`      | ESLint                   |
+| `npm run format`    | Prettier write           |
+| `npm test`          | Vitest                   |
+| `npm run test:e2e`  | Playwright (placeholder) |
 
-## Scope (MH-FE-002)
+## Auth (MH-FE-003)
 
-This foundation provides:
+- Login / logout / `/auth/me` against Laravel
+- Admin role gate (`role === ADMIN`)
+- Non-Admin users receive Access denied
+- Session restore on refresh via cookie + `/auth/me`
 
-- design tokens
-- application shell + Phase-1 navigation
-- route placeholders
-- shared UI primitives
-- API client foundation
-
-It does **not** implement authentication or Admin business modules.
+Domain modules remain placeholders.
 
 ## Related
 

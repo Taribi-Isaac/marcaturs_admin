@@ -16,7 +16,8 @@ import {
 } from 'lucide-react'
 import { primaryNavigation } from '@/app/config/navigation'
 import { appConfig } from '@/app/config/env'
-import { IconButton } from '@/shared/ui'
+import { useAuth } from '@/features/auth/useAuth'
+import { Button, IconButton } from '@/shared/ui'
 
 const iconById: Record<string, ReactNode> = {
   attention: <LayoutDashboard aria-hidden="true" />,
@@ -33,6 +34,7 @@ const iconById: Record<string, ReactNode> = {
 
 export function AppShell() {
   const [navOpen, setNavOpen] = useState(false)
+  const { user, logout } = useAuth()
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -104,16 +106,21 @@ export function AppShell() {
         </nav>
 
         <div className="app-shell__nav-footer">
-          <p
-            style={{
-              margin: 0,
-              fontSize: '0.75rem',
-              color: 'var(--color-nav-muted)',
-              padding: '0 0.65rem',
-            }}
-          >
-            Auth and domain modules arrive in later MH-FE tasks.
-          </p>
+          {user ? (
+            <div className="app-shell__session">
+              <div className="app-shell__session-name">{user.name}</div>
+              <div className="app-shell__session-email">{user.email}</div>
+              <Button
+                variant="ghost"
+                className="app-shell__sign-out"
+                onClick={() => {
+                  void logout()
+                }}
+              >
+                Sign out
+              </Button>
+            </div>
+          ) : null}
         </div>
       </aside>
 
@@ -133,11 +140,11 @@ export function AppShell() {
               <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
                 {appConfig.appName}
               </div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 600 }}>Phase 1 foundation</div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 600 }}>Operations console</div>
             </div>
           </div>
           <div className="app-shell__topbar-meta">
-            <span>API target configured</span>
+            <span>{user ? user.email : 'Signed in'}</span>
           </div>
         </header>
 

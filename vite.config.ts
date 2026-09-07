@@ -1,27 +1,58 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
+import { loadEnv } from 'vite'
 import { defineConfig } from 'vitest/config'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(rootDir, './src'),
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, rootDir, '')
+  const backendOrigin = env.VITE_BACKEND_ORIGIN || 'http://localhost:8000'
+
+  return {
+    plugins: [react()],
+    resolve: {
+      alias: {
+        '@': path.resolve(rootDir, './src'),
+      },
     },
-  },
-  server: {
-    port: 5174,
-    strictPort: true,
-  },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./src/test/setup.ts'],
-    css: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['node_modules', 'dist', 'e2e'],
-  },
+    server: {
+      port: 5174,
+      strictPort: true,
+      proxy: {
+        // Backend SANCTUM_STATEFUL_DOMAINS includes localhost:3000 but not :5174.
+        // Rewrite Origin/Referer so Sanctum applies SPA session + CSRF middleware
+        // without requiring a backend .env change.
+        '/api': {
+          target: backendOrigin,
+          changeOrigin: true,
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              proxyReq.setHeader('Origin', 'http://localhost:3000')
+              proxyReq.setHeader('Referer', 'http://localhost:3000/')
+            })
+          },
+        },
+        '/sanctum': {
+          target: backendOrigin,
+          changeOrigin: true,
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              proxyReq.setHeader('Origin', 'http://localhost:3000')
+              proxyReq.setHeader('Referer', 'http://localhost:3000/')
+            })
+          },
+        },
+      },
+    },
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      setupFiles: ['./src/test/setup.ts'],
+      css: true,
+      include: ['src/**/*.{test,spec}.{ts,tsx}'],
+      exclude: ['node_modules', 'dist', 'e2e'],
+    },
+  }
 })
