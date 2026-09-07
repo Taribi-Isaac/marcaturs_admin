@@ -77,6 +77,11 @@ Use seeded Admin emails from `backend/docs/development-seed.md`. Do not commit c
 - `/verification/submissions/:id` review detail, evidence download, review actions, history
 - `/verification/requirements` create/update requirements
 
+## Campaigns (MH-FE-006)
+
+- `/campaigns` moderation queue (defaults to `submitted`)
+- `/campaigns/:id` investigation workspace with moderation actions, resources, Featured and Extension inspection
+
 Other domain modules remain placeholders.
 
 ## Related

@@ -100,7 +100,7 @@ export function ReviewActions({ submissionId, status }: ReviewActionsProps) {
   const reviewable = canReviewSubmission(status)
   const startable = canStartReview(status)
 
-  if (!reviewable && !startable) {
+  if (!reviewable && !startable && !successMessage && !formError) {
     return (
       <section className="verification-panel">
         <h2>Review actions</h2>
@@ -125,53 +125,59 @@ export function ReviewActions({ submissionId, status }: ReviewActionsProps) {
         </Notice>
       ) : null}
 
-      <div className="verification-actions">
-        {startable ? (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setFormError(null)
-              setStartOpen(true)
-            }}
-          >
-            Start review
-          </Button>
-        ) : null}
-        {reviewable ? (
-          <>
-            <Button
-              variant="primary"
-              onClick={() => {
-                setFormError(null)
-                setFieldErrors({})
-                setDialogKind('approve')
-              }}
-            >
-              Approve
-            </Button>
-            <Button
-              variant="danger"
-              onClick={() => {
-                setFormError(null)
-                setFieldErrors({})
-                setDialogKind('reject')
-              }}
-            >
-              Reject
-            </Button>
+      {startable || reviewable ? (
+        <div className="verification-actions">
+          {startable ? (
             <Button
               variant="secondary"
               onClick={() => {
                 setFormError(null)
-                setFieldErrors({})
-                setDialogKind('request_information')
+                setStartOpen(true)
               }}
             >
-              Request information
+              Start review
             </Button>
-          </>
-        ) : null}
-      </div>
+          ) : null}
+          {reviewable ? (
+            <>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setFormError(null)
+                  setFieldErrors({})
+                  setDialogKind('approve')
+                }}
+              >
+                Approve
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => {
+                  setFormError(null)
+                  setFieldErrors({})
+                  setDialogKind('reject')
+                }}
+              >
+                Reject
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setFormError(null)
+                  setFieldErrors({})
+                  setDialogKind('request_information')
+                }}
+              >
+                Request information
+              </Button>
+            </>
+          ) : null}
+        </div>
+      ) : (
+        <p className="verification-muted">
+          No further Admin review actions are available for status <code>{status}</code>.
+        </p>
+      )}
 
       <ConfirmDialog
         open={startOpen}
@@ -206,7 +212,11 @@ export function ReviewActions({ submissionId, status }: ReviewActionsProps) {
             return
           }
           setFormError(null)
-          await reviewMutation.mutateAsync({ kind: dialogKind, ...values })
+          try {
+            await reviewMutation.mutateAsync({ kind: dialogKind, ...values })
+          } catch {
+            // Pessimistic mutation: ApiClientError is surfaced via onError.
+          }
         }}
       />
     </section>

@@ -52,8 +52,11 @@ export function CampaignAttentionQueue() {
         id: 'action',
         header: 'Action',
         align: 'right',
-        cell: () => (
-          <AttentionOpenLink to={ATTENTION_DESTINATIONS.campaigns} label="Open campaigns" />
+        cell: (row) => (
+          <AttentionOpenLink
+            to={`${ATTENTION_DESTINATIONS.campaigns}/${row.id}`}
+            label="Open campaign"
+          />
         ),
       },
     ],

@@ -117,7 +117,7 @@ describe('Verification submission detail', () => {
     await user.click(screen.getByRole('button', { name: 'Confirm start' }))
 
     expect(await screen.findByText('Review started.')).toBeInTheDocument()
-    expect(await screen.findByText('Under Review')).toBeInTheDocument()
+    expect(screen.getAllByText('Under Review').length).toBeGreaterThan(0)
 
     await user.click(screen.getByRole('button', { name: 'Approve' }))
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Approve' }))
@@ -139,7 +139,7 @@ describe('Verification submission detail', () => {
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Reject' }))
 
     expect(await screen.findByText('Reason is required.')).toBeInTheDocument()
-    expect(screen.getByText('Under Review')).toBeInTheDocument()
+    expect(screen.getAllByText('Under Review').length).toBeGreaterThan(0)
   })
 
   it('rejects with reason and refetches', async () => {
@@ -157,7 +157,7 @@ describe('Verification submission detail', () => {
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Reject' }))
 
     expect(await screen.findByText('Submission rejected.')).toBeInTheDocument()
-    expect(await screen.findByText('Rejected')).toBeInTheDocument()
+    expect(screen.getAllByText('Rejected').length).toBeGreaterThan(0)
   })
 
   it('requests information with reason', async () => {
@@ -177,7 +177,7 @@ describe('Verification submission detail', () => {
     )
 
     expect(await screen.findByText('Information requested.')).toBeInTheDocument()
-    expect(await screen.findByText('More Information Required')).toBeInTheDocument()
+    expect(screen.getAllByText('More Information Required').length).toBeGreaterThan(0)
   })
 })
 

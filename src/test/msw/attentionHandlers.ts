@@ -1,10 +1,12 @@
 import { http, HttpResponse } from 'msw'
 import type {
-  CampaignAttentionItem,
   DisputeAttentionItem,
   ReportedConversationAttentionItem,
   VerificationSubmissionAttentionItem,
 } from '@/features/attention/types'
+import { campaignSubmittedItem } from '@/test/msw/campaignHandlers'
+
+export { campaignSubmittedItem }
 
 function paginated<T>(items: T[], total = items.length, perPage = 15) {
   return {
@@ -77,38 +79,6 @@ export const verificationApprovedItem: VerificationSubmissionAttentionItem = {
   },
 }
 
-export const campaignSubmittedItem: CampaignAttentionItem = {
-  id: 201,
-  title: 'Enterprise Solar Partner Outreach for West Africa Distribution',
-  status: 'submitted',
-  submitted_at: '2026-09-06T11:00:00+00:00',
-  created_at: '2026-09-01T11:00:00+00:00',
-  updated_at: '2026-09-06T11:00:00+00:00',
-  category: { id: 3, name: 'Technology', slug: 'demo-technology' },
-  user: {
-    id: 13,
-    name: 'TechNova Systems Limited with an Unusually Long Legal Name',
-    email: 'business.tech@demo.marcaturshub.test',
-    role: 'BUSINESS',
-  },
-}
-
-export const campaignActiveItem: CampaignAttentionItem = {
-  id: 202,
-  title: 'Active campaign should not appear',
-  status: 'active',
-  submitted_at: '2026-08-01T11:00:00+00:00',
-  created_at: '2026-08-01T11:00:00+00:00',
-  updated_at: '2026-08-10T11:00:00+00:00',
-  category: { id: 1, name: 'Energy', slug: 'demo-energy' },
-  user: {
-    id: 11,
-    name: 'Ada Solar Ventures Ltd',
-    email: 'business.solar@demo.marcaturshub.test',
-    role: 'BUSINESS',
-  },
-}
-
 export const disputeOpenItem: DisputeAttentionItem = {
   id: 301,
   reference: 'MH-D-DEMO0001',
@@ -159,20 +129,16 @@ export const reportedConversationItem: ReportedConversationAttentionItem = {
 export type AttentionFixtureState = {
   verificationPending: VerificationSubmissionAttentionItem[]
   verificationUnderReview: VerificationSubmissionAttentionItem[]
-  campaignsSubmitted: CampaignAttentionItem[]
   disputes: DisputeAttentionItem[]
   conversations: ReportedConversationAttentionItem[]
   failVerification?: boolean
-  failCampaigns?: boolean
   failDisputes?: boolean
   failConversations?: boolean
-  forbidCampaigns?: boolean
 }
 
 export const attentionFixtures: AttentionFixtureState = {
   verificationPending: [verificationPendingItem],
   verificationUnderReview: [verificationUnderReviewItem],
-  campaignsSubmitted: [campaignSubmittedItem],
   disputes: [disputeOpenItem, disputeClosedItem],
   conversations: [reportedConversationItem],
 }
@@ -180,48 +146,14 @@ export const attentionFixtures: AttentionFixtureState = {
 export function resetAttentionFixtures(): void {
   attentionFixtures.verificationPending = [verificationPendingItem]
   attentionFixtures.verificationUnderReview = [verificationUnderReviewItem]
-  attentionFixtures.campaignsSubmitted = [campaignSubmittedItem]
   attentionFixtures.disputes = [disputeOpenItem, disputeClosedItem]
   attentionFixtures.conversations = [reportedConversationItem]
   attentionFixtures.failVerification = false
-  attentionFixtures.failCampaigns = false
   attentionFixtures.failDisputes = false
   attentionFixtures.failConversations = false
-  attentionFixtures.forbidCampaigns = false
 }
 
 export const attentionHandlers = [
-  http.get('/api/v1/admin/campaigns', ({ request }) => {
-    if (attentionFixtures.forbidCampaigns) {
-      return HttpResponse.json(
-        {
-          success: false,
-          error: { code: 'forbidden', message: 'Forbidden.' },
-        },
-        { status: 403 },
-      )
-    }
-
-    if (attentionFixtures.failCampaigns) {
-      return HttpResponse.json(
-        {
-          success: false,
-          error: { code: 'server_error', message: 'Campaign queue unavailable.' },
-        },
-        { status: 500 },
-      )
-    }
-
-    const status = new URL(request.url).searchParams.get('status')
-    if (status === 'submitted') {
-      return HttpResponse.json(paginated(attentionFixtures.campaignsSubmitted))
-    }
-
-    return HttpResponse.json(
-      paginated([...attentionFixtures.campaignsSubmitted, campaignActiveItem]),
-    )
-  }),
-
   http.get('/api/v1/admin/disputes', () => {
     if (attentionFixtures.failDisputes) {
       return HttpResponse.json(

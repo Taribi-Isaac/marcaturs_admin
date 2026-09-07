@@ -13,6 +13,7 @@ import {
   disputeOpenItem,
   reportedConversationItem,
 } from '@/test/msw/attentionHandlers'
+import { campaignFixtures } from '@/test/msw/campaignHandlers'
 import {
   pendingSubmission,
   underReviewSubmission,
@@ -62,7 +63,9 @@ describe('Attention Home', () => {
   it('renders empty states for each queue independently', async () => {
     session.user = adminUser
     verificationFixtures.submissions = []
-    attentionFixtures.campaignsSubmitted = []
+    campaignFixtures.campaigns = campaignFixtures.campaigns.filter(
+      (item) => item.status !== 'submitted',
+    )
     attentionFixtures.disputes = []
     attentionFixtures.conversations = []
 
@@ -101,19 +104,24 @@ describe('Attention Home', () => {
     let campaignCalls = 0
 
     server.use(
-      http.get('/api/v1/admin/campaigns', () => {
+      http.get('/api/v1/admin/campaigns', ({ request }) => {
         campaignCalls += 1
+        const status = new URL(request.url).searchParams.get('status')
+        const items =
+          status === 'submitted'
+            ? campaignFixtures.campaigns.filter((item) => item.status === 'submitted')
+            : campaignFixtures.campaigns
         return HttpResponse.json({
           success: true,
-          data: attentionFixtures.campaignsSubmitted,
+          data: items,
           meta: {
             pagination: {
               current_page: 1,
               per_page: 15,
-              total: attentionFixtures.campaignsSubmitted.length,
+              total: items.length,
               last_page: 1,
-              from: 1,
-              to: 1,
+              from: items.length ? 1 : null,
+              to: items.length || null,
             },
           },
         })
@@ -131,7 +139,7 @@ describe('Attention Home', () => {
     })
   })
 
-  it('renders navigation links into module placeholders', async () => {
+  it('renders navigation links into module destinations', async () => {
     session.user = adminUser
     const user = userEvent.setup()
     renderApp('/attention')
@@ -141,9 +149,9 @@ describe('Attention Home', () => {
       'href',
       `/verification/submissions/${pendingSubmission.id}`,
     )
-    expect(screen.getAllByRole('link', { name: 'Open campaigns' })[0]).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: 'Open campaign' })[0]).toHaveAttribute(
       'href',
-      '/campaigns',
+      `/campaigns/${campaignSubmittedItem.id}`,
     )
     expect(screen.getAllByRole('link', { name: 'Open disputes' })[0]).toHaveAttribute(
       'href',
@@ -154,8 +162,10 @@ describe('Attention Home', () => {
       '/moderation/reported-conversations',
     )
 
-    await user.click(screen.getAllByRole('link', { name: 'Open campaigns' })[0]!)
-    expect(await screen.findByRole('heading', { name: 'Campaigns' })).toBeInTheDocument()
+    await user.click(screen.getAllByRole('link', { name: 'Open campaign' })[0]!)
+    expect(
+      await screen.findByRole('heading', { name: campaignSubmittedItem.title }),
+    ).toBeInTheDocument()
   })
 
   it('routes 401 through established auth handling', async () => {
@@ -191,13 +201,15 @@ describe('Attention Home', () => {
 
   it('shows access denied for a 403 queue without logging the Admin out', async () => {
     session.user = adminUser
-    attentionFixtures.forbidCampaigns = true
+    campaignFixtures.forbidList = true
 
     renderApp('/attention')
 
     const campaignHeading = await screen.findByRole('heading', { name: /Campaign moderation/ })
     expect(
-      within(campaignHeading.closest('section')!).getByRole('heading', { name: 'Access denied' }),
+      await within(campaignHeading.closest('section')!).findByRole('heading', {
+        name: 'Access denied',
+      }),
     ).toBeInTheDocument()
 
     expect(await screen.findByText(pendingSubmission.user!.name)).toBeInTheDocument()
