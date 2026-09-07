@@ -191,34 +191,6 @@ export function resetAttentionFixtures(): void {
 }
 
 export const attentionHandlers = [
-  http.get('/api/v1/admin/verification/submissions', ({ request }) => {
-    if (attentionFixtures.failVerification) {
-      return HttpResponse.json(
-        {
-          success: false,
-          error: { code: 'server_error', message: 'Verification queue unavailable.' },
-        },
-        { status: 500 },
-      )
-    }
-
-    const status = new URL(request.url).searchParams.get('status')
-    if (status === 'pending') {
-      return HttpResponse.json(paginated(attentionFixtures.verificationPending))
-    }
-    if (status === 'under_review') {
-      return HttpResponse.json(paginated(attentionFixtures.verificationUnderReview))
-    }
-
-    return HttpResponse.json(
-      paginated([
-        ...attentionFixtures.verificationPending,
-        ...attentionFixtures.verificationUnderReview,
-        verificationApprovedItem,
-      ]),
-    )
-  }),
-
   http.get('/api/v1/admin/campaigns', ({ request }) => {
     if (attentionFixtures.forbidCampaigns) {
       return HttpResponse.json(

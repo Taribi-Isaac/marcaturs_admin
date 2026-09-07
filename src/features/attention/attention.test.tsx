@@ -1,8 +1,8 @@
+import { describe, expect, it } from 'vitest'
+import { http, HttpResponse } from 'msw'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
-import { http, HttpResponse } from 'msw'
 import { AppProviders } from '@/app/providers/AppProviders'
 import { AppRouter } from '@/app/router/AppRouter'
 import { adminUser, session } from '@/test/msw/handlers'
@@ -12,9 +12,12 @@ import {
   disputeClosedItem,
   disputeOpenItem,
   reportedConversationItem,
-  verificationPendingItem,
-  verificationUnderReviewItem,
 } from '@/test/msw/attentionHandlers'
+import {
+  pendingSubmission,
+  underReviewSubmission,
+  verificationFixtures,
+} from '@/test/msw/verificationHandlers'
 import { server } from '@/test/setup'
 
 function renderApp(initialPath = '/attention') {
@@ -38,8 +41,8 @@ describe('Attention Home', () => {
     expect(screen.getByRole('heading', { name: /^Disputes/ })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /Reported conversations/ })).toBeInTheDocument()
 
-    expect(await screen.findByText(verificationPendingItem.user!.name!)).toBeInTheDocument()
-    expect(screen.getByText(verificationUnderReviewItem.requirement!.name)).toBeInTheDocument()
+    expect(await screen.findByText(pendingSubmission.user!.name)).toBeInTheDocument()
+    expect(screen.getByText(underReviewSubmission.requirement!.name)).toBeInTheDocument()
     expect(screen.getByText(campaignSubmittedItem.title)).toBeInTheDocument()
     expect(screen.getByText(disputeOpenItem.reference)).toBeInTheDocument()
     expect(screen.getByText(`#${reportedConversationItem.id}`)).toBeInTheDocument()
@@ -58,8 +61,7 @@ describe('Attention Home', () => {
 
   it('renders empty states for each queue independently', async () => {
     session.user = adminUser
-    attentionFixtures.verificationPending = []
-    attentionFixtures.verificationUnderReview = []
+    verificationFixtures.submissions = []
     attentionFixtures.campaignsSubmitted = []
     attentionFixtures.disputes = []
     attentionFixtures.conversations = []
@@ -78,7 +80,7 @@ describe('Attention Home', () => {
 
   it('keeps other queues usable when one queue fails and supports retry', async () => {
     session.user = adminUser
-    attentionFixtures.failVerification = true
+    verificationFixtures.failList = true
     const user = userEvent.setup()
 
     renderApp('/attention')
@@ -87,10 +89,10 @@ describe('Attention Home', () => {
     expect(await screen.findByText(campaignSubmittedItem.title)).toBeInTheDocument()
     expect(screen.getByText(disputeOpenItem.reference)).toBeInTheDocument()
 
-    attentionFixtures.failVerification = false
+    verificationFixtures.failList = false
     await user.click(screen.getByRole('button', { name: 'Try again' }))
 
-    expect(await screen.findByText(verificationPendingItem.user!.name!)).toBeInTheDocument()
+    expect(await screen.findByText(pendingSubmission.user!.name)).toBeInTheDocument()
   })
 
   it('refreshes all attention queries from the page control', async () => {
@@ -135,7 +137,10 @@ describe('Attention Home', () => {
     renderApp('/attention')
 
     const verificationLinks = await screen.findAllByRole('link', { name: 'Open verification' })
-    expect(verificationLinks[0]).toHaveAttribute('href', '/verification')
+    expect(verificationLinks[0]).toHaveAttribute(
+      'href',
+      `/verification/submissions/${pendingSubmission.id}`,
+    )
     expect(screen.getAllByRole('link', { name: 'Open campaigns' })[0]).toHaveAttribute(
       'href',
       '/campaigns',
@@ -190,12 +195,12 @@ describe('Attention Home', () => {
 
     renderApp('/attention')
 
-    const campaignSection = await screen.findByRole('heading', { name: /Campaign moderation/ })
+    const campaignHeading = await screen.findByRole('heading', { name: /Campaign moderation/ })
     expect(
-      within(campaignSection.closest('section')!).getByRole('heading', { name: 'Access denied' }),
+      within(campaignHeading.closest('section')!).getByRole('heading', { name: 'Access denied' }),
     ).toBeInTheDocument()
 
-    expect(await screen.findByText(verificationPendingItem.user!.name!)).toBeInTheDocument()
+    expect(await screen.findByText(pendingSubmission.user!.name)).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Admin modules' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Administrator sign in' })).not.toBeInTheDocument()
   })
@@ -203,14 +208,10 @@ describe('Attention Home', () => {
 
 describe('Attention queue filtering helpers', () => {
   it('does not treat approved verification fixtures as attention defaults', () => {
-    expect(attentionFixtures.verificationPending.every((item) => item.status === 'pending')).toBe(
-      true,
-    )
     expect(
-      attentionFixtures.verificationUnderReview.every((item) => item.status === 'under_review'),
+      verificationFixtures.submissions
+        .filter((item) => item.status === 'pending' || item.status === 'under_review')
+        .every((item) => item.status === 'pending' || item.status === 'under_review'),
     ).toBe(true)
   })
 })
-
-// silence unused import in case tree-shaking tools complain in editors
-void vi

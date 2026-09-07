@@ -71,6 +71,12 @@ Use seeded Admin emails from `backend/docs/development-seed.md`. Do not commit c
 - Disputes (open statuses, client-filtered)
 - Reported conversations (read-only list)
 
+## Verification (MH-FE-005)
+
+- `/verification` submissions queue with status filter + pagination
+- `/verification/submissions/:id` review detail, evidence download, review actions, history
+- `/verification/requirements` create/update requirements
+
 Other domain modules remain placeholders.
 
 ## Related

@@ -1,0 +1,233 @@
+.verification-page {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.verification-filters__actions {
+  display: flex;
+  align-items: end;
+  margin-left: auto;
+}
+
+.verification-stack {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.verification-stack__primary {
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}
+
+.verification-stack__secondary {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.verification-clamp {
+  display: block;
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verification-action-link {
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.verification-action-link:hover {
+  text-decoration: underline;
+}
+
+.verification-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.verification-pagination__meta,
+.verification-muted {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.verification-pagination__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.verification-panel {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.verification-panel h2 {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.verification-detail-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.verification-panel--wide {
+  grid-column: 1 / -1;
+}
+
+.verification-detail-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.verification-dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.verification-dl dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.verification-dl dd {
+  margin: 0.2rem 0 0;
+  font-size: var(--text-sm);
+}
+
+.verification-dl__full {
+  grid-column: 1 / -1;
+}
+
+.verification-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.verification-evidence-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.verification-evidence-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.verification-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.verification-timeline__item {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.verification-timeline__item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.verification-timeline__header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.verification-timeline__note {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.verification-dialog-form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dialog--wide {
+  width: min(32rem, 100%);
+}
+
+.verification-requirement-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.verification-requirement-form__grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.verification-requirement-form__grid .field:last-child {
+  grid-column: 1 / -1;
+}
+
+.verification-requirement-form__checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.verification-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 840px) {
+  .verification-detail-grid,
+  .verification-dl,
+  .verification-requirement-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .verification-filters__actions {
+    margin-left: 0;
+  }
+
+  .verification-clamp {
+    max-width: 12rem;
+  }
+}

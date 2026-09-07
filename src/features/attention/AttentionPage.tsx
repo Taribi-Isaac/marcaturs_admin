@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useIsFetching, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { CampaignAttentionQueue } from '@/features/attention/CampaignAttentionQueue'
 import { DisputeAttentionQueue } from '@/features/attention/DisputeAttentionQueue'
 import { ReportedConversationAttentionQueue } from '@/features/attention/ReportedConversationAttentionQueue'
@@ -10,19 +10,16 @@ import { PageHeader } from '@/shared/ui'
 
 export function AttentionPage() {
   const queryClient = useQueryClient()
-  const [manualRefresh, setManualRefresh] = useState(false)
-  const fetchingCount = useIsFetching({ queryKey: ATTENTION_QUERY_KEYS.all })
-  const isRefreshing = manualRefresh && fetchingCount > 0
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  useEffect(() => {
-    if (manualRefresh && fetchingCount === 0) {
-      setManualRefresh(false)
+  async function handleRefresh() {
+    setIsRefreshing(true)
+    try {
+      await queryClient.invalidateQueries({ queryKey: ATTENTION_QUERY_KEYS.all })
+      await queryClient.refetchQueries({ queryKey: ATTENTION_QUERY_KEYS.all })
+    } finally {
+      setIsRefreshing(false)
     }
-  }, [manualRefresh, fetchingCount])
-
-  function handleRefresh() {
-    setManualRefresh(true)
-    void queryClient.invalidateQueries({ queryKey: ATTENTION_QUERY_KEYS.all })
   }
 
   return (
@@ -33,7 +30,9 @@ export function AttentionPage() {
         breadcrumbs={[{ label: 'Attention' }]}
         actions={
           <AttentionRefreshButton
-            onClick={handleRefresh}
+            onClick={() => {
+              void handleRefresh()
+            }}
             disabled={isRefreshing}
             isRefreshing={isRefreshing}
           />

@@ -52,8 +52,11 @@ export function VerificationAttentionQueue() {
         id: 'action',
         header: 'Action',
         align: 'right',
-        cell: () => (
-          <AttentionOpenLink to={ATTENTION_DESTINATIONS.verification} label="Open verification" />
+        cell: (row) => (
+          <AttentionOpenLink
+            to={`${ATTENTION_DESTINATIONS.verification}/submissions/${row.id}`}
+            label="Open verification"
+          />
         ),
       },
     ],
