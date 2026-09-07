@@ -1,0 +1,104 @@
+:root {
+  /* Surfaces — cool operational neutrals, not cream/purple SaaS */
+  --color-bg: #eef0ee;
+  --color-surface: #ffffff;
+  --color-surface-muted: #e4e7e4;
+  --color-surface-elevated: #f7f8f6;
+
+  --color-border: #c9cec9;
+  --color-border-strong: #8f978f;
+
+  --color-text-primary: #121614;
+  --color-text-secondary: #3a423d;
+  --color-text-muted: #6b746d;
+
+  /* Accent — deep teal ink (restrained, commercial) */
+  --color-accent: #1a4a43;
+  --color-accent-hover: #123530;
+  --color-accent-muted: #d7e6e2;
+  --color-accent-contrast: #f4faf8;
+
+  --color-success: #1b6b45;
+  --color-success-muted: #d9eee3;
+  --color-warning: #8a5a12;
+  --color-warning-muted: #f3e6cf;
+  --color-danger: #8b2e2e;
+  --color-danger-muted: #f3d9d9;
+  --color-info: #1d4f73;
+  --color-info-muted: #d7e6f1;
+
+  --color-focus: #1a4a43;
+  --color-focus-ring: rgba(26, 74, 67, 0.35);
+
+  /* Navigation rail */
+  --color-nav-bg: #101412;
+  --color-nav-border: #1f2622;
+  --color-nav-text: #c5ccc6;
+  --color-nav-muted: #7f8982;
+  --color-nav-active-bg: #1c2622;
+  --color-nav-active-text: #ffffff;
+  --color-nav-hover-bg: #171d1a;
+
+  /* Typography */
+  --font-sans: 'Source Sans 3 Variable', 'Source Sans 3', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+
+  --leading-tight: 1.25;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Spacing scale (4px base) */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Radii — restrained */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+
+  /* Elevation — nearly flat; dialogs only */
+  --shadow-dialog: 0 12px 32px rgba(18, 22, 20, 0.16);
+
+  /* Motion */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Layout */
+  --nav-width: 14.5rem;
+  --nav-width-collapsed: 4rem;
+  --header-height: 3.25rem;
+  --content-max: 72rem;
+
+  /* Breakpoints mirrored in JS */
+  --bp-tablet: 768px;
+  --bp-laptop: 1024px;
+  --bp-desktop: 1280px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+  }
+}
