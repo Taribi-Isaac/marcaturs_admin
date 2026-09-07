@@ -1,0 +1,115 @@
+.config-page {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.config-domain-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-3);
+}
+
+.config-domain-nav__link {
+  display: inline-flex;
+  padding: 0.4rem 0.75rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+}
+
+.config-domain-nav__link:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-muted, transparent);
+}
+
+.config-domain-nav__link.is-active {
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.config-panel {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.config-panel h2 {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.config-form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.config-form__grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.config-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.config-stack {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.config-primary {
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}
+
+.config-muted {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.config-status {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.config-status--warning {
+  color: var(--color-text-primary);
+}
+
+.config-status--danger {
+  color: var(--color-text-primary);
+}
+
+.config-status--muted {
+  color: var(--color-text-muted);
+}
+
+.config-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 840px) {
+  .config-form__grid {
+    grid-template-columns: 1fr;
+  }
+}

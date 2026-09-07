@@ -5,13 +5,23 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ApiClientError } from '@/shared/api'
 import {
-  createDisputeCategory,
-  fetchDisputeCategories,
-  updateDisputeCategory,
+  createExtensionPackage,
+  createFeaturedPackage,
+  fetchExtensionPackages,
+  fetchFeaturedPackages,
+  updateExtensionPackage,
+  updateFeaturedPackage,
 } from '@/features/configuration/api'
-import { CONFIG_QUERY_KEYS } from '@/features/configuration/constants'
-import { formatActiveLabel, formatFieldErrors } from '@/features/configuration/format'
-import type { DisputeCategory } from '@/features/configuration/types'
+import { CONFIG_QUERY_KEYS, PACKAGE_CURRENCY_OPTIONS } from '@/features/configuration/constants'
+import {
+  formatActiveLabel,
+  formatAmountMinor,
+  formatConfigTimestamp,
+  formatFieldErrors,
+  majorAmountToMinor,
+  minorAmountToMajorInput,
+} from '@/features/configuration/format'
+import type { PackageDomain, PlatformPackage } from '@/features/configuration/types'
 import { ConfigurationDomainNav } from '@/features/configuration/components/ConfigurationDomainNav'
 import {
   Button,
@@ -21,41 +31,71 @@ import {
   ForbiddenState,
   Notice,
   PageHeader,
-  TextAreaField,
+  SelectField,
   TextField,
   type DataTableColumn,
 } from '@/shared/ui'
 
-const createSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required.').max(120),
-  code: z.string().trim().max(64).optional().or(z.literal('')),
-  description: z.string().max(500).optional().or(z.literal('')),
+const packageSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required.').max(255),
+  duration_days: z.number().int().min(1, 'Duration must be at least 1 day.').max(3650),
+  amount_major: z
+    .string()
+    .trim()
+    .min(1, 'Price is required.')
+    .refine((value) => majorAmountToMinor(value) != null && (majorAmountToMinor(value) ?? 0) >= 1, {
+      message: 'Enter a valid price with up to 2 decimal places (minimum 0.01).',
+    }),
+  currency: z.enum(['NGN']),
   is_active: z.boolean(),
-  sort_order: z.number().int().min(0).max(100000),
+  sort_order: z.number().int().min(0).max(10000),
 })
 
-const updateSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required.').max(120),
-  description: z.string().max(500).optional().or(z.literal('')),
-  is_active: z.boolean(),
-  sort_order: z.number().int().min(0).max(100000),
-})
+type PackageFormValues = z.infer<typeof packageSchema>
 
-type CreateFormValues = z.infer<typeof createSchema>
-type FormValues = CreateFormValues
+const copy: Record<
+  PackageDomain,
+  {
+    title: string
+    description: string
+    emptyTitle: string
+    createLabel: string
+    boundary: string
+  }
+> = {
+  extension: {
+    title: 'Extension packages',
+    description: 'Configure paid Campaign Extension products. These extend listing duration only.',
+    emptyTitle: 'No extension packages configured.',
+    createLabel: 'Create extension package',
+    boundary:
+      'Platform monetization only. This does not receive customer payments or settle ambassador commissions.',
+  },
+  featured: {
+    title: 'Featured packages',
+    description:
+      'Configure paid Featured visibility products. These are time-bound platform entitlements.',
+    emptyTitle: 'No featured packages configured.',
+    createLabel: 'Create featured package',
+    boundary:
+      'Platform monetization only. Featured visibility is separate from customer payments and commission settlement.',
+  },
+}
 
-export function DisputeCategoriesConfigPage() {
+export function PackageConfigPage({ domain }: { domain: PackageDomain }) {
   const queryClient = useQueryClient()
   const formId = useId()
-  const [editing, setEditing] = useState<DisputeCategory | null>(null)
+  const meta = copy[domain]
+  const [editing, setEditing] = useState<PlatformPackage | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
-  const [pendingValues, setPendingValues] = useState<FormValues | null>(null)
+  const [pendingValues, setPendingValues] = useState<PackageFormValues | null>(null)
 
   const listQuery = useQuery({
-    queryKey: CONFIG_QUERY_KEYS.disputeCategories,
-    queryFn: ({ signal }) => fetchDisputeCategories(signal),
+    queryKey: CONFIG_QUERY_KEYS.packages(domain),
+    queryFn: ({ signal }) =>
+      domain === 'extension' ? fetchExtensionPackages(signal) : fetchFeaturedPackages(signal),
     staleTime: 30_000,
     refetchOnWindowFocus: false,
     retry: false,
@@ -67,12 +107,13 @@ export function DisputeCategoriesConfigPage() {
     reset,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
-    resolver: zodResolver(editing ? updateSchema : createSchema),
+  } = useForm<PackageFormValues>({
+    resolver: zodResolver(packageSchema),
     defaultValues: {
       name: '',
-      code: '',
-      description: '',
+      duration_days: 30,
+      amount_major: '0.01',
+      currency: 'NGN',
       is_active: true,
       sort_order: 0,
     },
@@ -85,16 +126,18 @@ export function DisputeCategoriesConfigPage() {
     if (editing) {
       reset({
         name: editing.name,
-        code: editing.code,
-        description: editing.description ?? '',
-        is_active: editing.is_active,
-        sort_order: editing.sort_order,
+        duration_days: editing.duration_days,
+        amount_major: minorAmountToMajorInput(editing.amount_minor),
+        currency: (editing.currency as 'NGN') || 'NGN',
+        is_active: editing.is_active ?? true,
+        sort_order: editing.sort_order ?? 0,
       })
     } else {
       reset({
         name: '',
-        code: '',
-        description: '',
+        duration_days: 30,
+        amount_major: '0.01',
+        currency: 'NGN',
         is_active: true,
         sort_order: 0,
       })
@@ -102,30 +145,33 @@ export function DisputeCategoriesConfigPage() {
   }, [editing, formOpen, reset])
 
   const saveMutation = useMutation({
-    mutationFn: async (values: FormValues) => {
-      if (editing) {
-        return updateDisputeCategory(editing.id, {
-          name: values.name.trim(),
-          description: values.description?.trim() ? values.description.trim() : null,
-          is_active: values.is_active,
-          sort_order: values.sort_order,
-        })
+    mutationFn: async (values: PackageFormValues) => {
+      const amountMinor = majorAmountToMinor(values.amount_major)
+      if (amountMinor == null || amountMinor < 1) {
+        throw new Error('Invalid amount')
       }
-      return createDisputeCategory({
+      const payload = {
         name: values.name.trim(),
-        code: values.code?.trim() ? values.code.trim() : null,
-        description: values.description?.trim() ? values.description.trim() : null,
+        duration_days: values.duration_days,
+        amount_minor: amountMinor,
+        currency: values.currency,
         is_active: values.is_active,
         sort_order: values.sort_order,
-      })
+      }
+      if (domain === 'extension') {
+        return editing
+          ? updateExtensionPackage(editing.id, payload)
+          : createExtensionPackage(payload)
+      }
+      return editing ? updateFeaturedPackage(editing.id, payload) : createFeaturedPackage(payload)
     },
     onSuccess: async () => {
-      setSuccessMessage(editing ? 'Dispute category updated.' : 'Dispute category created.')
+      setSuccessMessage(editing ? 'Package updated.' : 'Package created.')
       setFormOpen(false)
       setEditing(null)
       setPendingValues(null)
       setFormError(null)
-      await queryClient.invalidateQueries({ queryKey: CONFIG_QUERY_KEYS.disputeCategories })
+      await queryClient.invalidateQueries({ queryKey: CONFIG_QUERY_KEYS.packages(domain) })
     },
     onError: (error) => {
       if (error instanceof ApiClientError) {
@@ -137,32 +183,40 @@ export function DisputeCategoriesConfigPage() {
         )
         const mapped = formatFieldErrors(error.details)
         for (const [key, message] of Object.entries(mapped)) {
-          if (key === 'name' || key === 'code' || key === 'description' || key === 'sort_order') {
-            setError(key as keyof FormValues, { message })
+          if (
+            key === 'name' ||
+            key === 'duration_days' ||
+            key === 'currency' ||
+            key === 'sort_order'
+          ) {
+            setError(key as keyof PackageFormValues, { message })
+          }
+          if (key === 'amount_minor') {
+            setError('amount_major', { message })
           }
         }
         return
       }
-      setFormError('Unable to save dispute category.')
+      setFormError('Unable to save package.')
     },
   })
 
-  const columns = useMemo<DataTableColumn<DisputeCategory>[]>(
+  const columns = useMemo<DataTableColumn<PlatformPackage>[]>(
     () => [
       {
         id: 'name',
-        header: 'Category',
-        cell: (row) => (
-          <div className="config-stack">
-            <span className="config-primary">{row.name}</span>
-            <span className="config-muted">{row.code}</span>
-          </div>
-        ),
+        header: 'Package',
+        cell: (row) => <span className="config-primary">{row.name}</span>,
       },
       {
-        id: 'description',
-        header: 'Description',
-        cell: (row) => row.description ?? '—',
+        id: 'duration',
+        header: 'Duration',
+        cell: (row) => `${row.duration_days} days`,
+      },
+      {
+        id: 'price',
+        header: 'Price',
+        cell: (row) => formatAmountMinor(row.amount_minor, row.currency),
       },
       {
         id: 'active',
@@ -176,7 +230,12 @@ export function DisputeCategoriesConfigPage() {
       {
         id: 'sort',
         header: 'Order',
-        cell: (row) => row.sort_order,
+        cell: (row) => row.sort_order ?? '—',
+      },
+      {
+        id: 'updated',
+        header: 'Updated',
+        cell: (row) => formatConfigTimestamp(row.updated_at),
       },
       {
         id: 'action',
@@ -205,9 +264,9 @@ export function DisputeCategoriesConfigPage() {
   return (
     <div className="config-page">
       <PageHeader
-        title="Dispute categories"
-        description="Configure the taxonomy used when opening dispute cases. Code is immutable after create."
-        breadcrumbs={[{ label: 'Configuration' }, { label: 'Dispute categories' }]}
+        title={meta.title}
+        description={meta.description}
+        breadcrumbs={[{ label: 'Configuration' }, { label: meta.title }]}
         actions={
           <Button
             variant="primary"
@@ -218,12 +277,16 @@ export function DisputeCategoriesConfigPage() {
               setFormError(null)
             }}
           >
-            Create dispute category
+            {meta.createLabel}
           </Button>
         }
       />
 
       <ConfigurationDomainNav />
+
+      <Notice tone="info" title="Platform payment boundary">
+        {meta.boundary}
+      </Notice>
 
       {successMessage ? (
         <Notice tone="success" title="Saved">
@@ -233,9 +296,7 @@ export function DisputeCategoriesConfigPage() {
 
       {formOpen ? (
         <section className="config-panel" aria-labelledby={`${formId}-title`}>
-          <h2 id={`${formId}-title`}>
-            {editing ? 'Edit dispute category' : 'Create dispute category'}
-          </h2>
+          <h2 id={`${formId}-title`}>{editing ? 'Edit package' : 'Create package'}</h2>
           <form
             className="config-form"
             onSubmit={handleSubmit(async (values) => {
@@ -258,40 +319,42 @@ export function DisputeCategoriesConfigPage() {
                 error={errors.name?.message}
                 {...register('name')}
               />
-              {!editing ? (
-                <TextField
-                  id={`${formId}-code`}
-                  label="Code (optional)"
-                  error={errors.code?.message}
-                  {...register('code')}
-                />
-              ) : (
-                <div>
-                  <div className="config-muted">Code</div>
-                  <div className="config-primary">{editing.code}</div>
-                  <p className="config-muted">Code cannot be changed after create.</p>
-                  {errors.code?.message ? (
-                    <p className="field__error" role="alert">
-                      {errors.code.message}
-                    </p>
-                  ) : null}
-                </div>
-              )}
+              <TextField
+                id={`${formId}-duration`}
+                label="Duration (days)"
+                type="number"
+                min={1}
+                max={3650}
+                error={errors.duration_days?.message}
+                {...register('duration_days', { valueAsNumber: true })}
+              />
+              <TextField
+                id={`${formId}-amount`}
+                label="Price (major units)"
+                inputMode="decimal"
+                error={errors.amount_major?.message}
+                {...register('amount_major')}
+              />
+              <SelectField
+                id={`${formId}-currency`}
+                label="Currency"
+                error={errors.currency?.message}
+                {...register('currency')}
+              >
+                {PACKAGE_CURRENCY_OPTIONS.map((currency) => (
+                  <option key={currency} value={currency}>
+                    {currency}
+                  </option>
+                ))}
+              </SelectField>
               <TextField
                 id={`${formId}-sort`}
                 label="Sort order"
                 type="number"
                 min={0}
-                max={100000}
+                max={10000}
                 error={errors.sort_order?.message}
                 {...register('sort_order', { valueAsNumber: true })}
-              />
-              <TextAreaField
-                id={`${formId}-description`}
-                label="Description"
-                rows={3}
-                error={errors.description?.message}
-                {...register('description')}
               />
             </div>
             <label className="config-check">
@@ -321,11 +384,7 @@ export function DisputeCategoriesConfigPage() {
                 variant="primary"
                 disabled={isSubmitting || saveMutation.isPending}
               >
-                {saveMutation.isPending
-                  ? 'Saving…'
-                  : editing
-                    ? 'Save changes'
-                    : 'Save dispute category'}
+                {saveMutation.isPending ? 'Saving…' : editing ? 'Save changes' : 'Create package'}
               </Button>
             </div>
           </form>
@@ -334,8 +393,8 @@ export function DisputeCategoriesConfigPage() {
 
       <ConfirmDialog
         open={pendingValues != null}
-        title="Deactivate dispute category"
-        description="Inactive dispute categories are unavailable for new dispute openings."
+        title="Deactivate package"
+        description="Inactive packages are unavailable for new purchases. Existing entitlements are unaffected by this configuration change."
         confirmLabel="Deactivate"
         tone="danger"
         onCancel={() => setPendingValues(null)}
@@ -353,11 +412,11 @@ export function DisputeCategoriesConfigPage() {
         <ForbiddenState />
       ) : listQuery.error ? (
         <ErrorState
-          title="Unable to load dispute categories"
+          title={`Unable to load ${meta.title.toLowerCase()}`}
           description={
             listQuery.error instanceof ApiClientError
               ? listQuery.error.message
-              : 'Dispute categories could not be loaded.'
+              : 'Packages could not be loaded.'
           }
           onRetry={() => {
             void listQuery.refetch()
@@ -369,9 +428,9 @@ export function DisputeCategoriesConfigPage() {
           rows={listQuery.data ?? []}
           getRowId={(row) => String(row.id)}
           isLoading={listQuery.isLoading}
-          emptyTitle="No dispute categories configured."
-          emptyDescription="Create categories for dispute opening taxonomy."
-          caption="Dispute categories"
+          emptyTitle={meta.emptyTitle}
+          emptyDescription="Create a package to make this platform product available."
+          caption={`${meta.title} configuration`}
         />
       )}
     </div>

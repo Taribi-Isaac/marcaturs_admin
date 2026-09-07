@@ -87,6 +87,17 @@ Use seeded Admin emails from `backend/docs/development-seed.md`. Do not commit c
 - `/disputes` investigation queue (page-local actionable/historical views; backend has no status filter)
 - `/disputes/:id` case workspace with Deal context, evidence download, timeline, and investigation actions
 
+## Configuration (MH-FE-008)
+
+Administrative configuration domains only (not a general settings dashboard):
+
+- `/configuration/categories` — marketplace category listing status and activation
+- `/configuration/extension-packages` — platform Campaign Extension packages
+- `/configuration/featured-packages` — platform Featured Campaign packages
+- `/configuration/dispute-categories` — dispute opening taxonomy
+
+Uses Admin APIs only (`GET`/`POST`/`PATCH`). No delete endpoints exist. Extension and Featured packages are platform monetization configuration, not customer/commission settlement.
+
 Other domain modules remain placeholders.
 
 ## Related
