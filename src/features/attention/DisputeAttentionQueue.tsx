@@ -86,8 +86,11 @@ export function DisputeAttentionQueue() {
         id: 'action',
         header: 'Action',
         align: 'right',
-        cell: () => (
-          <AttentionOpenLink to={ATTENTION_DESTINATIONS.disputes} label="Open disputes" />
+        cell: (row) => (
+          <AttentionOpenLink
+            to={`${ATTENTION_DESTINATIONS.disputes}/${row.id}`}
+            label="Open dispute"
+          />
         ),
       },
     ],

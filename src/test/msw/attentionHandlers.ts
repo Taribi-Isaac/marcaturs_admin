@@ -1,12 +1,12 @@
 import { http, HttpResponse } from 'msw'
 import type {
-  DisputeAttentionItem,
   ReportedConversationAttentionItem,
   VerificationSubmissionAttentionItem,
 } from '@/features/attention/types'
 import { campaignSubmittedItem } from '@/test/msw/campaignHandlers'
+import { disputeClosedItem, disputeOpenItem } from '@/test/msw/disputeHandlers'
 
-export { campaignSubmittedItem }
+export { campaignSubmittedItem, disputeClosedItem, disputeOpenItem }
 
 function paginated<T>(items: T[], total = items.length, perPage = 15) {
   return {
@@ -79,40 +79,6 @@ export const verificationApprovedItem: VerificationSubmissionAttentionItem = {
   },
 }
 
-export const disputeOpenItem: DisputeAttentionItem = {
-  id: 301,
-  reference: 'MH-D-DEMO0001',
-  status: 'submitted',
-  deal_id: 41,
-  commission_id: 51,
-  description: 'Commission amount disputed after deal completion review.',
-  created_at: '2026-09-05T08:00:00+00:00',
-  updated_at: '2026-09-05T08:00:00+00:00',
-  category: { id: 7, name: 'Commission amount disputed', code: 'commission_amount_disputed' },
-  reporter: { id: 21, role: 'AMBASSADOR' },
-  accused: { id: 11, role: 'BUSINESS' },
-  deal: {
-    id: 41,
-    business: { id: 11, name: 'Ada Solar Ventures Ltd', role: 'BUSINESS' },
-    ambassador: { id: 21, name: 'Ada Nwosu', role: 'AMBASSADOR' },
-    campaign: { id: 9, title: 'Solar reseller program', status: 'active' },
-  },
-}
-
-export const disputeClosedItem: DisputeAttentionItem = {
-  id: 399,
-  reference: 'MH-D-DEMO0099',
-  status: 'closed',
-  deal_id: 42,
-  commission_id: 52,
-  description: 'Closed dispute should not require attention.',
-  created_at: '2026-08-01T08:00:00+00:00',
-  updated_at: '2026-08-20T08:00:00+00:00',
-  category: { id: 7, name: 'Commission amount disputed', code: 'commission_amount_disputed' },
-  reporter: { id: 21, role: 'AMBASSADOR' },
-  accused: { id: 11, role: 'BUSINESS' },
-}
-
 export const reportedConversationItem: ReportedConversationAttentionItem = {
   id: 401,
   reported: true,
@@ -129,47 +95,26 @@ export const reportedConversationItem: ReportedConversationAttentionItem = {
 export type AttentionFixtureState = {
   verificationPending: VerificationSubmissionAttentionItem[]
   verificationUnderReview: VerificationSubmissionAttentionItem[]
-  disputes: DisputeAttentionItem[]
   conversations: ReportedConversationAttentionItem[]
   failVerification?: boolean
-  failDisputes?: boolean
   failConversations?: boolean
 }
 
 export const attentionFixtures: AttentionFixtureState = {
   verificationPending: [verificationPendingItem],
   verificationUnderReview: [verificationUnderReviewItem],
-  disputes: [disputeOpenItem, disputeClosedItem],
   conversations: [reportedConversationItem],
 }
 
 export function resetAttentionFixtures(): void {
   attentionFixtures.verificationPending = [verificationPendingItem]
   attentionFixtures.verificationUnderReview = [verificationUnderReviewItem]
-  attentionFixtures.disputes = [disputeOpenItem, disputeClosedItem]
   attentionFixtures.conversations = [reportedConversationItem]
   attentionFixtures.failVerification = false
-  attentionFixtures.failDisputes = false
   attentionFixtures.failConversations = false
 }
 
 export const attentionHandlers = [
-  http.get('/api/v1/admin/disputes', () => {
-    if (attentionFixtures.failDisputes) {
-      return HttpResponse.json(
-        {
-          success: false,
-          error: { code: 'server_error', message: 'Dispute queue unavailable.' },
-        },
-        { status: 500 },
-      )
-    }
-
-    return HttpResponse.json(
-      paginated(attentionFixtures.disputes, attentionFixtures.disputes.length, 20),
-    )
-  }),
-
   http.get('/api/v1/admin/conversations', () => {
     if (attentionFixtures.failConversations) {
       return HttpResponse.json(

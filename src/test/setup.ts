@@ -3,12 +3,14 @@ import { afterAll, afterEach, beforeAll } from 'vitest'
 import { authHandlers, resetSession } from './msw/handlers'
 import { attentionHandlers, resetAttentionFixtures } from './msw/attentionHandlers'
 import { campaignHandlers, resetCampaignFixtures } from './msw/campaignHandlers'
+import { disputeHandlers, resetDisputeFixtures } from './msw/disputeHandlers'
 import { verificationHandlers, resetVerificationFixtures } from './msw/verificationHandlers'
 import '@testing-library/jest-dom/vitest'
 
 export const server = setupServer(
   ...authHandlers,
   ...campaignHandlers,
+  ...disputeHandlers,
   ...attentionHandlers,
   ...verificationHandlers,
 )
@@ -21,6 +23,7 @@ afterEach(() => {
   server.resetHandlers()
   resetSession()
   resetCampaignFixtures()
+  resetDisputeFixtures()
   resetAttentionFixtures()
   resetVerificationFixtures()
 })

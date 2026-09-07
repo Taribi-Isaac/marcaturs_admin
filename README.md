@@ -82,6 +82,11 @@ Use seeded Admin emails from `backend/docs/development-seed.md`. Do not commit c
 - `/campaigns` moderation queue (defaults to `submitted`)
 - `/campaigns/:id` investigation workspace with moderation actions, resources, Featured and Extension inspection
 
+## Disputes (MH-FE-007)
+
+- `/disputes` investigation queue (page-local actionable/historical views; backend has no status filter)
+- `/disputes/:id` case workspace with Deal context, evidence download, timeline, and investigation actions
+
 Other domain modules remain placeholders.
 
 ## Related

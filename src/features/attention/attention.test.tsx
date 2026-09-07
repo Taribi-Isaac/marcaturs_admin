@@ -14,6 +14,7 @@ import {
   reportedConversationItem,
 } from '@/test/msw/attentionHandlers'
 import { campaignFixtures } from '@/test/msw/campaignHandlers'
+import { disputeFixtures } from '@/test/msw/disputeHandlers'
 import {
   pendingSubmission,
   underReviewSubmission,
@@ -55,7 +56,7 @@ describe('Attention Home', () => {
 
     expect(await screen.findByText(disputeOpenItem.reference)).toBeInTheDocument()
     expect(screen.getByText('Pending')).toBeInTheDocument()
-    expect(screen.getByText('Under Review')).toBeInTheDocument()
+    expect(screen.getAllByText('Under Review').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Submitted').length).toBeGreaterThan(0)
     expect(screen.queryByText(disputeClosedItem.reference)).not.toBeInTheDocument()
   })
@@ -66,7 +67,7 @@ describe('Attention Home', () => {
     campaignFixtures.campaigns = campaignFixtures.campaigns.filter(
       (item) => item.status !== 'submitted',
     )
-    attentionFixtures.disputes = []
+    disputeFixtures.disputes = []
     attentionFixtures.conversations = []
 
     renderApp('/attention')
@@ -153,18 +154,22 @@ describe('Attention Home', () => {
       'href',
       `/campaigns/${campaignSubmittedItem.id}`,
     )
-    expect(screen.getAllByRole('link', { name: 'Open disputes' })[0]).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: 'Open dispute' })[0]).toHaveAttribute(
       'href',
-      '/disputes',
+      expect.stringMatching(/^\/disputes\/\d+$/),
     )
+    const disputeLink = screen
+      .getAllByRole('link', { name: 'Open dispute' })
+      .find((link) => link.getAttribute('href') === `/disputes/${disputeOpenItem.id}`)
+    expect(disputeLink).toBeTruthy()
     expect(screen.getAllByRole('link', { name: 'Open moderation' })[0]).toHaveAttribute(
       'href',
       '/moderation/reported-conversations',
     )
 
-    await user.click(screen.getAllByRole('link', { name: 'Open campaign' })[0]!)
+    await user.click(disputeLink!)
     expect(
-      await screen.findByRole('heading', { name: campaignSubmittedItem.title }),
+      await screen.findByRole('heading', { name: disputeOpenItem.reference }),
     ).toBeInTheDocument()
   })
 
