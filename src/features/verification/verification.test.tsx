@@ -218,6 +218,27 @@ describe('Verification requirements', () => {
 
     expect(await screen.findByText('Name is required.')).toBeInTheDocument()
   })
+
+  it('requires confirmation before deactivating an active requirement and cancels safely', async () => {
+    session.user = adminUser
+    const user = userEvent.setup()
+    renderApp('/verification/requirements')
+
+    expect(await screen.findByText('Demo Business registration evidence')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: 'Edit' })[0]!)
+    expect(screen.getByLabelText('Active')).toBeChecked()
+    await user.click(screen.getByLabelText('Active'))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
+    expect(screen.getByText(/This requirement will become inactive/i)).toBeInTheDocument()
+
+    const confirm = screen.getByRole('alertdialog')
+    await user.click(within(confirm).getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect(screen.queryByText('Requirement updated.')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Active')).not.toBeChecked()
+  })
 })
 
 describe('Verification auth boundaries', () => {

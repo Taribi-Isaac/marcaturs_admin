@@ -136,7 +136,7 @@ export type VerificationFixtureState = {
 }
 
 export const verificationFixtures: VerificationFixtureState = {
-  requirements: [demoRequirement],
+  requirements: [structuredClone(demoRequirement)],
   submissions: [pendingSubmission, underReviewSubmission, approvedSubmission],
   events: {
     101: [
@@ -177,7 +177,7 @@ export const verificationFixtures: VerificationFixtureState = {
 }
 
 export function resetVerificationFixtures(): void {
-  verificationFixtures.requirements = [demoRequirement]
+  verificationFixtures.requirements = [structuredClone(demoRequirement)]
   verificationFixtures.submissions = [
     { ...pendingSubmission, evidence: [...(pendingSubmission.evidence ?? [])] },
     { ...underReviewSubmission },

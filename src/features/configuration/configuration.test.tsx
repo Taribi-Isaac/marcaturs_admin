@@ -58,6 +58,8 @@ describe('Categories configuration', () => {
     expect(
       screen.getByText(/Assignable, but may require additional verification/i),
     ).toBeInTheDocument()
+    expect(screen.getByText('Restricted')).toBeInTheDocument()
+    expect(screen.getByText('Allowed')).toBeInTheDocument()
   })
 
   it('shows empty state', async () => {

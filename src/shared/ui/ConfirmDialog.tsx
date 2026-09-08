@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from 'react'
 import { Button } from './Button'
+import { useDialogAccessibility } from './useDialogAccessibility'
 
 export type ConfirmDialogProps = {
   open: boolean
@@ -25,29 +26,24 @@ export function ConfirmDialog({
   const titleId = useId()
   const descriptionId = useId()
   const cancelRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  useDialogAccessibility({
+    open,
+    containerRef: dialogRef,
+    initialFocusRef: cancelRef,
+    onEscape: onCancel,
+  })
 
   useEffect(() => {
     if (!open) {
       return
     }
-
-    const previous = document.activeElement
-    cancelRef.current?.focus()
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onCancel()
-      }
-    }
-
-    document.addEventListener('keydown', onKeyDown)
+    document.body.style.overflow = 'hidden'
     return () => {
-      document.removeEventListener('keydown', onKeyDown)
-      if (previous instanceof HTMLElement) {
-        previous.focus()
-      }
+      document.body.style.overflow = ''
     }
-  }, [open, onCancel])
+  }, [open])
 
   if (!open) {
     return null
@@ -60,8 +56,10 @@ export function ConfirmDialog({
         className="dialog-backdrop__dismiss"
         aria-label="Dismiss dialog"
         onClick={onCancel}
+        tabIndex={-1}
       />
       <div
+        ref={dialogRef}
         className="dialog"
         role="alertdialog"
         aria-modal="true"

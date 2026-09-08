@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, TextAreaField } from '@/shared/ui'
+import { useDialogAccessibility } from '@/shared/ui/useDialogAccessibility'
 
 export type CampaignActionKind =
   'approve' | 'reject' | 'request_modification' | 'activate' | 'suspend' | 'close'
@@ -93,6 +94,7 @@ export function CampaignActionDialog({
   const titleId = useId()
   const descriptionId = useId()
   const cancelRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const reasonMode = kind ? copy[kind].reasonMode : 'none'
 
   const {
@@ -112,22 +114,24 @@ export function CampaignActionDialog({
     defaultValues: { reason: '' },
   })
 
+  useDialogAccessibility({
+    open: open && kind != null,
+    containerRef: dialogRef,
+    initialFocusRef: cancelRef,
+    onEscape: onCancel,
+    escapeEnabled: !isSubmitting,
+  })
+
   useEffect(() => {
     if (!open) {
       return
     }
     reset({ reason: '' })
-    cancelRef.current?.focus()
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && !isSubmitting) {
-        onCancel()
-      }
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
     }
-
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, reset, onCancel, isSubmitting])
+  }, [open, reset])
 
   useEffect(() => {
     if (!fieldErrors?.reason) {
@@ -150,8 +154,10 @@ export function CampaignActionDialog({
         aria-label="Dismiss dialog"
         onClick={onCancel}
         disabled={isSubmitting}
+        tabIndex={-1}
       />
       <div
+        ref={dialogRef}
         className="dialog dialog--wide"
         role="dialog"
         aria-modal="true"

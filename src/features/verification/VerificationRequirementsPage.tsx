@@ -19,6 +19,7 @@ import { formatFieldErrors } from '@/features/verification/format'
 import type { VerificationRequirement } from '@/features/verification/types'
 import {
   Button,
+  ConfirmDialog,
   DataTable,
   ErrorState,
   ForbiddenState,
@@ -48,6 +49,7 @@ export function VerificationRequirementsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
+  const [pendingValues, setPendingValues] = useState<RequirementFormValues | null>(null)
 
   const listQuery = useQuery({
     queryKey: VERIFICATION_QUERY_KEYS.requirements,
@@ -126,6 +128,7 @@ export function VerificationRequirementsPage() {
       setSuccessMessage(editing ? 'Requirement updated.' : 'Requirement created.')
       setFormOpen(false)
       setEditing(null)
+      setPendingValues(null)
       setFormError(null)
       await queryClient.invalidateQueries({ queryKey: VERIFICATION_QUERY_KEYS.requirements })
     },
@@ -240,7 +243,15 @@ export function VerificationRequirementsPage() {
             className="verification-requirement-form"
             onSubmit={handleSubmit(async (values) => {
               setFormError(null)
-              await saveMutation.mutateAsync(values)
+              if (editing?.is_active && !values.is_active) {
+                setPendingValues(values)
+                return
+              }
+              try {
+                await saveMutation.mutateAsync(values)
+              } catch {
+                // Surfaced via onError.
+              }
             })}
           >
             <div className="verification-requirement-form__grid">
@@ -333,6 +344,23 @@ export function VerificationRequirementsPage() {
           </form>
         </section>
       ) : null}
+
+      <ConfirmDialog
+        open={pendingValues != null}
+        title="Deactivate verification requirement"
+        description="This requirement will become inactive. New verification submissions will no longer use it until it is activated again."
+        confirmLabel="Deactivate"
+        tone="danger"
+        onCancel={() => setPendingValues(null)}
+        onConfirm={() => {
+          if (!pendingValues) {
+            return
+          }
+          const values = pendingValues
+          setPendingValues(null)
+          void saveMutation.mutateAsync(values).catch(() => undefined)
+        }}
+      />
 
       {forbidden ? (
         <ForbiddenState />

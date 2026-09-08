@@ -20,8 +20,8 @@ export const primaryNavigation: NavSection[] = [
     items: [
       { id: 'attention', label: 'Attention', to: '/attention', end: true },
       { id: 'verification', label: 'Verification', to: '/verification' },
-      { id: 'campaigns', label: 'Campaigns', to: '/campaigns', end: true },
-      { id: 'disputes', label: 'Disputes', to: '/disputes', end: true },
+      { id: 'campaigns', label: 'Campaigns', to: '/campaigns' },
+      { id: 'disputes', label: 'Disputes', to: '/disputes' },
       { id: 'moderation', label: 'Moderation', to: '/moderation/reported-conversations' },
     ],
   },

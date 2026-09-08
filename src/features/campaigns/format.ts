@@ -16,17 +16,8 @@ export function formatCampaignTimestamp(value: string | null | undefined): strin
   return dateTime.format(parsed)
 }
 
-export function formatMoneyMinor(amountMinor: number | null | undefined, currency = 'NGN'): string {
-  if (amountMinor == null || Number.isNaN(amountMinor)) {
-    return '—'
-  }
-
-  return new Intl.NumberFormat(undefined, {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(amountMinor / 100)
-}
+/** Integer-safe money display — aliases the shared Admin money helper. */
+export { formatAmountMinor as formatMoneyMinor } from '@/shared/lib/money'
 
 export function formatBytes(size: number | null | undefined): string {
   if (size == null || Number.isNaN(size)) {

@@ -178,9 +178,11 @@ export function CategoriesConfigPage() {
                     : 'config-status'
               }
             >
-              {formatListingStatusLabel(row.listing_status)}
+              <span className="config-status__label">
+                {formatListingStatusLabel(row.listing_status)}
+              </span>
             </span>
-            <span className="config-muted">
+            <span className="config-status__hint">
               {CATEGORY_LISTING_STATUSES.find((item) => item.value === row.listing_status)?.meaning}
             </span>
           </div>

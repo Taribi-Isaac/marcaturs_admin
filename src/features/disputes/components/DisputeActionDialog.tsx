@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, TextAreaField } from '@/shared/ui'
+import { useDialogAccessibility } from '@/shared/ui/useDialogAccessibility'
 
 export type DisputeActionKind =
   | 'start_review'
@@ -116,6 +117,7 @@ export function DisputeActionDialog({
   const titleId = useId()
   const descriptionId = useId()
   const cancelRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   const {
     register,
@@ -133,22 +135,24 @@ export function DisputeActionDialog({
     },
   })
 
+  useDialogAccessibility({
+    open: open && kind != null,
+    containerRef: dialogRef,
+    initialFocusRef: cancelRef,
+    onEscape: onCancel,
+    escapeEnabled: !isSubmitting,
+  })
+
   useEffect(() => {
     if (!open) {
       return
     }
     reset({ note: '', reason: '', decision_notes: '', action_notes: '' })
-    cancelRef.current?.focus()
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && !isSubmitting) {
-        onCancel()
-      }
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
     }
-
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, reset, onCancel, isSubmitting, kind])
+  }, [open, reset, kind])
 
   useEffect(() => {
     if (!fieldErrors) {
@@ -173,8 +177,10 @@ export function DisputeActionDialog({
         aria-label="Dismiss dialog"
         onClick={onCancel}
         disabled={isSubmitting}
+        tabIndex={-1}
       />
       <div
+        ref={dialogRef}
         className="dialog dialog--wide"
         role="dialog"
         aria-modal="true"

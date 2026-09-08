@@ -12,4 +12,3 @@ export { EmptyState, LoadingState, ErrorState, ForbiddenState, NotFoundState } f
 export { Skeleton } from './Skeleton'
 export { Notice } from './Notice'
 export { Divider } from './Divider'
-export { ModulePlaceholder } from './ModulePlaceholder'

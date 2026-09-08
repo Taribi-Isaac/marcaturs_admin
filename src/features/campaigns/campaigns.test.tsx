@@ -114,6 +114,7 @@ describe('Campaign detail workspace', () => {
     ).toBeInTheDocument()
     expect(await screen.findByText(demoFeatured.package_name)).toBeInTheDocument()
     expect(screen.getByText(demoFeatured.payment!.reference)).toBeInTheDocument()
+    expect(screen.getByText('25000.00 NGN')).toBeInTheDocument()
   })
 
   it('renders extension history and submitted resources honestly', async () => {
