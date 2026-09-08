@@ -7,6 +7,7 @@ import { NotFoundPage } from '@/app/router/NotFoundPage'
 import { attentionRoutes } from '@/features/attention/routes'
 import { verificationRoutes } from '@/features/verification/routes'
 import { campaignsRoutes } from '@/features/campaigns/routes'
+import { dealsRoutes } from '@/features/deals/routes'
 import { disputesRoutes } from '@/features/disputes/routes'
 import { usersRoutes } from '@/features/users/routes'
 import { moderationRoutes } from '@/features/moderation/routes'
@@ -27,6 +28,7 @@ export function AppRouter() {
             ...attentionRoutes,
             ...verificationRoutes,
             ...campaignsRoutes,
+            ...dealsRoutes,
             ...disputesRoutes,
             ...usersRoutes,
             ...moderationRoutes,

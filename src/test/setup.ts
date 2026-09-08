@@ -7,12 +7,14 @@ import { configurationHandlers, resetConfigurationFixtures } from './msw/configu
 import { disputeHandlers, resetDisputeFixtures } from './msw/disputeHandlers'
 import { moderationHandlers, resetModerationFixtures } from './msw/moderationHandlers'
 import { userHandlers, resetUserFixtures } from './msw/userHandlers'
+import { dealHandlers, resetDealFixtures } from './msw/dealHandlers'
 import { verificationHandlers, resetVerificationFixtures } from './msw/verificationHandlers'
 import '@testing-library/jest-dom/vitest'
 
 export const server = setupServer(
   ...authHandlers,
   ...campaignHandlers,
+  ...dealHandlers,
   ...disputeHandlers,
   ...configurationHandlers,
   ...moderationHandlers,
@@ -29,6 +31,7 @@ afterEach(() => {
   server.resetHandlers()
   resetSession()
   resetCampaignFixtures()
+  resetDealFixtures()
   resetDisputeFixtures()
   resetConfigurationFixtures()
   resetModerationFixtures()
