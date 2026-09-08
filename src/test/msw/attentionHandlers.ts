@@ -1,29 +1,9 @@
-import { http, HttpResponse } from 'msw'
-import type {
-  ReportedConversationAttentionItem,
-  VerificationSubmissionAttentionItem,
-} from '@/features/attention/types'
+import type { VerificationSubmissionAttentionItem } from '@/features/attention/types'
 import { campaignSubmittedItem } from '@/test/msw/campaignHandlers'
 import { disputeClosedItem, disputeOpenItem } from '@/test/msw/disputeHandlers'
+import { reportedConversationItem } from '@/test/msw/moderationHandlers'
 
-export { campaignSubmittedItem, disputeClosedItem, disputeOpenItem }
-
-function paginated<T>(items: T[], total = items.length, perPage = 15) {
-  return {
-    success: true as const,
-    data: items,
-    meta: {
-      pagination: {
-        current_page: 1,
-        per_page: perPage,
-        total,
-        last_page: Math.max(1, Math.ceil(total / perPage)),
-        from: items.length ? 1 : null,
-        to: items.length || null,
-      },
-    },
-  }
-}
+export { campaignSubmittedItem, disputeClosedItem, disputeOpenItem, reportedConversationItem }
 
 export const verificationPendingItem: VerificationSubmissionAttentionItem = {
   id: 101,
@@ -79,55 +59,21 @@ export const verificationApprovedItem: VerificationSubmissionAttentionItem = {
   },
 }
 
-export const reportedConversationItem: ReportedConversationAttentionItem = {
-  id: 401,
-  reported: true,
-  reported_at: '2026-09-04T16:30:00+00:00',
-  report_reason:
-    'Participant reported unprofessional conduct and repeated off-platform payment requests during negotiation.',
-  created_at: '2026-09-01T10:00:00+00:00',
-  updated_at: '2026-09-04T16:30:00+00:00',
-  business: { id: 11, name: 'Ada Solar Ventures Ltd', role: 'BUSINESS' },
-  ambassador: { id: 21, name: 'Ada Nwosu', role: 'AMBASSADOR' },
-  reported_by: { id: 11, role: 'BUSINESS' },
-}
-
 export type AttentionFixtureState = {
   verificationPending: VerificationSubmissionAttentionItem[]
   verificationUnderReview: VerificationSubmissionAttentionItem[]
-  conversations: ReportedConversationAttentionItem[]
   failVerification?: boolean
-  failConversations?: boolean
 }
 
 export const attentionFixtures: AttentionFixtureState = {
   verificationPending: [verificationPendingItem],
   verificationUnderReview: [verificationUnderReviewItem],
-  conversations: [reportedConversationItem],
 }
 
 export function resetAttentionFixtures(): void {
   attentionFixtures.verificationPending = [verificationPendingItem]
   attentionFixtures.verificationUnderReview = [verificationUnderReviewItem]
-  attentionFixtures.conversations = [reportedConversationItem]
   attentionFixtures.failVerification = false
-  attentionFixtures.failConversations = false
 }
 
-export const attentionHandlers = [
-  http.get('/api/v1/admin/conversations', () => {
-    if (attentionFixtures.failConversations) {
-      return HttpResponse.json(
-        {
-          success: false,
-          error: { code: 'server_error', message: 'Conversation queue unavailable.' },
-        },
-        { status: 500 },
-      )
-    }
-
-    return HttpResponse.json(
-      paginated(attentionFixtures.conversations, attentionFixtures.conversations.length, 50),
-    )
-  }),
-]
+export const attentionHandlers: never[] = []

@@ -68,8 +68,11 @@ export function ReportedConversationAttentionQueue() {
         id: 'action',
         header: 'Action',
         align: 'right',
-        cell: () => (
-          <AttentionOpenLink to={ATTENTION_DESTINATIONS.conversations} label="Open moderation" />
+        cell: (row) => (
+          <AttentionOpenLink
+            to={`${ATTENTION_DESTINATIONS.conversations}/${row.id}`}
+            label="Open moderation"
+          />
         ),
       },
     ],

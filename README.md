@@ -69,7 +69,7 @@ Use seeded Admin emails from `backend/docs/development-seed.md`. Do not commit c
 - Verification (`pending`, `under_review`)
 - Campaign moderation (`submitted`)
 - Disputes (open statuses, client-filtered)
-- Reported conversations (read-only list)
+- Reported conversations (read-only; Attention opens moderation detail)
 
 ## Verification (MH-FE-005)
 
@@ -97,6 +97,13 @@ Administrative configuration domains only (not a general settings dashboard):
 - `/configuration/dispute-categories` — dispute opening taxonomy
 
 Uses Admin APIs only (`GET`/`POST`/`PATCH`). No delete endpoints exist. Extension and Featured packages are platform monetization configuration, not customer/commission settlement.
+
+## Moderation (MH-FE-009)
+
+- `/moderation/reported-conversations` — reported Business↔Ambassador conversation queue
+- `/moderation/reported-conversations/:id` — read-only inspection with message history
+
+Admin APIs: `GET /admin/conversations`, `GET /admin/conversations/:id`, `GET /admin/conversations/:id/messages`. No dismiss/resolve/send/delete actions exist.
 
 Other domain modules remain placeholders.
 

@@ -53,6 +53,8 @@ export default defineConfig(({ mode }) => {
       css: true,
       include: ['src/**/*.{test,spec}.{ts,tsx}'],
       exclude: ['node_modules', 'dist', 'e2e'],
+      // Shared MSW fixture objects are mutated per test; run files sequentially.
+      fileParallelism: false,
     },
   }
 })

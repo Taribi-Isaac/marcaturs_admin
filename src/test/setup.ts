@@ -5,6 +5,7 @@ import { attentionHandlers, resetAttentionFixtures } from './msw/attentionHandle
 import { campaignHandlers, resetCampaignFixtures } from './msw/campaignHandlers'
 import { configurationHandlers, resetConfigurationFixtures } from './msw/configurationHandlers'
 import { disputeHandlers, resetDisputeFixtures } from './msw/disputeHandlers'
+import { moderationHandlers, resetModerationFixtures } from './msw/moderationHandlers'
 import { verificationHandlers, resetVerificationFixtures } from './msw/verificationHandlers'
 import '@testing-library/jest-dom/vitest'
 
@@ -13,6 +14,7 @@ export const server = setupServer(
   ...campaignHandlers,
   ...disputeHandlers,
   ...configurationHandlers,
+  ...moderationHandlers,
   ...attentionHandlers,
   ...verificationHandlers,
 )
@@ -27,6 +29,7 @@ afterEach(() => {
   resetCampaignFixtures()
   resetDisputeFixtures()
   resetConfigurationFixtures()
+  resetModerationFixtures()
   resetAttentionFixtures()
   resetVerificationFixtures()
 })

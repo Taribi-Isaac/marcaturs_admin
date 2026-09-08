@@ -7,7 +7,6 @@ import { AppProviders } from '@/app/providers/AppProviders'
 import { AppRouter } from '@/app/router/AppRouter'
 import { adminUser, session } from '@/test/msw/handlers'
 import {
-  attentionFixtures,
   campaignSubmittedItem,
   disputeClosedItem,
   disputeOpenItem,
@@ -68,7 +67,24 @@ describe('Attention Home', () => {
       (item) => item.status !== 'submitted',
     )
     disputeFixtures.disputes = []
-    attentionFixtures.conversations = []
+    server.use(
+      http.get('/api/v1/admin/conversations', () =>
+        HttpResponse.json({
+          success: true,
+          data: [],
+          meta: {
+            pagination: {
+              current_page: 1,
+              per_page: 50,
+              total: 0,
+              last_page: 1,
+              from: null,
+              to: null,
+            },
+          },
+        }),
+      ),
+    )
 
     renderApp('/attention')
 
@@ -164,7 +180,7 @@ describe('Attention Home', () => {
     expect(disputeLink).toBeTruthy()
     expect(screen.getAllByRole('link', { name: 'Open moderation' })[0]).toHaveAttribute(
       'href',
-      '/moderation/reported-conversations',
+      `/moderation/reported-conversations/${reportedConversationItem.id}`,
     )
 
     await user.click(disputeLink!)
