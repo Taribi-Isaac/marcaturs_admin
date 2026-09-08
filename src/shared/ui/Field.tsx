@@ -1,8 +1,9 @@
-import type {
-  InputHTMLAttributes,
-  ReactNode,
-  SelectHTMLAttributes,
-  TextareaHTMLAttributes,
+import {
+  forwardRef,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
 } from 'react'
 
 type FieldShellProps = {
@@ -64,19 +65,22 @@ export type TextAreaFieldProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   error?: string
 }
 
-export function TextAreaField({ id, label, hint, error, className, ...props }: TextAreaFieldProps) {
-  return (
-    <FieldShell id={id} label={label} hint={hint} error={error}>
-      <textarea
-        id={id}
-        className={['field__control', className].filter(Boolean).join(' ')}
-        aria-invalid={Boolean(error) || undefined}
-        aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
-        {...props}
-      />
-    </FieldShell>
-  )
-}
+export const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProps>(
+  function TextAreaField({ id, label, hint, error, className, ...props }, ref) {
+    return (
+      <FieldShell id={id} label={label} hint={hint} error={error}>
+        <textarea
+          id={id}
+          className={['field__control', className].filter(Boolean).join(' ')}
+          aria-invalid={Boolean(error) || undefined}
+          aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
+          {...props}
+          ref={ref}
+        />
+      </FieldShell>
+    )
+  },
+)
 
 export type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
   id: string

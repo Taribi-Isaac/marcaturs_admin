@@ -8,6 +8,7 @@ import { attentionRoutes } from '@/features/attention/routes'
 import { verificationRoutes } from '@/features/verification/routes'
 import { campaignsRoutes } from '@/features/campaigns/routes'
 import { disputesRoutes } from '@/features/disputes/routes'
+import { usersRoutes } from '@/features/users/routes'
 import { moderationRoutes } from '@/features/moderation/routes'
 import { configurationRoutes } from '@/features/configuration/routes'
 import { accountRoutes } from '@/features/account/routes'
@@ -27,6 +28,7 @@ export function AppRouter() {
             ...verificationRoutes,
             ...campaignsRoutes,
             ...disputesRoutes,
+            ...usersRoutes,
             ...moderationRoutes,
             ...configurationRoutes,
             ...accountRoutes,

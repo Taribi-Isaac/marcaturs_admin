@@ -22,6 +22,7 @@ export const primaryNavigation: NavSection[] = [
       { id: 'verification', label: 'Verification', to: '/verification' },
       { id: 'campaigns', label: 'Campaigns', to: '/campaigns' },
       { id: 'disputes', label: 'Disputes', to: '/disputes' },
+      { id: 'users', label: 'Users', to: '/users' },
       { id: 'moderation', label: 'Moderation', to: '/moderation/reported-conversations' },
     ],
   },

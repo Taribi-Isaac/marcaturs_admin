@@ -57,8 +57,23 @@ const accountTone: Record<AccountStatus, DomainStatusTone> = {
   banned: 'danger',
 }
 
+const verificationOverallTone: Record<string, DomainStatusTone> = {
+  not_started: 'neutral',
+  pending: 'info',
+  under_review: 'warning',
+  verified: 'success',
+  rejected: 'danger',
+  more_information_required: 'warning',
+}
+
 export type StatusDomain =
-  'campaign' | 'deal' | 'commission' | 'dispute' | 'verification_submission' | 'account'
+  | 'campaign'
+  | 'deal'
+  | 'commission'
+  | 'dispute'
+  | 'verification_submission'
+  | 'verification_overall'
+  | 'account'
 
 export function resolveStatusTone(domain: StatusDomain, status: string): DomainStatusTone {
   switch (domain) {
@@ -72,6 +87,12 @@ export function resolveStatusTone(domain: StatusDomain, status: string): DomainS
       return isKey(disputeTone, status) ? disputeTone[status] : 'neutral'
     case 'verification_submission':
       return isKey(verificationTone, status) ? verificationTone[status] : 'neutral'
+    case 'verification_overall': {
+      const key = status.toLowerCase()
+      return Object.prototype.hasOwnProperty.call(verificationOverallTone, key)
+        ? verificationOverallTone[key]!
+        : 'neutral'
+    }
     case 'account':
       return isKey(accountTone, status) ? accountTone[status] : 'neutral'
     default:

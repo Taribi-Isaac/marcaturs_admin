@@ -12,6 +12,7 @@ import {
   Settings2,
   Sparkles,
   UserRound,
+  Users,
   X,
 } from 'lucide-react'
 import { primaryNavigation } from '@/app/config/navigation'
@@ -24,6 +25,7 @@ const iconById: Record<string, ReactNode> = {
   verification: <BadgeCheck aria-hidden="true" />,
   campaigns: <Package aria-hidden="true" />,
   disputes: <Scale aria-hidden="true" />,
+  users: <Users aria-hidden="true" />,
   moderation: <MessageSquareWarning aria-hidden="true" />,
   categories: <FolderTree aria-hidden="true" />,
   'extension-packages': <Settings2 aria-hidden="true" />,

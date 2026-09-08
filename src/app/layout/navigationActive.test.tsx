@@ -6,6 +6,7 @@ import { AppRouter } from '@/app/router/AppRouter'
 import { adminUser, session } from '@/test/msw/handlers'
 import { activeCampaign } from '@/test/msw/campaignHandlers'
 import { submittedDispute } from '@/test/msw/disputeHandlers'
+import { activeBusinessUser } from '@/test/msw/userHandlers'
 
 function renderApp(initialPath: string) {
   return render(
@@ -42,5 +43,14 @@ describe('Shell navigation active state', () => {
       'aria-current',
       'page',
     )
+  })
+
+  it('keeps Users active on user detail routes', async () => {
+    session.user = adminUser
+    renderApp(`/users/${activeBusinessUser.id}`)
+
+    expect(await screen.findByRole('heading', { name: 'Ada Solar' })).toBeInTheDocument()
+    const nav = screen.getByRole('navigation', { name: 'Admin modules' })
+    expect(within(nav).getByRole('link', { name: 'Users' })).toHaveAttribute('aria-current', 'page')
   })
 })
