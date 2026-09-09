@@ -20,6 +20,32 @@ export type CampaignCurrentVersionSummary = {
   id: number
   version_number: number
   status: string
+  /** Present only when current version is published (MH-BE-036). */
+  product_name?: string | null
+  product_description?: string | null
+  pricing_method?: string | null
+  price_amount?: string | number | null
+  price_currency?: string | null
+  service_area?: string | null
+  commission_type?: string | null
+  commission_rate?: string | number | null
+  commission_amount?: string | number | null
+  commission_trigger?: string | null
+  commission_trigger_description?: string | null
+  commission_payment_deadline_days?: number | null
+  minimum_qualifying_amount?: string | number | null
+  qualifying_conditions?: string | null
+  refund_cancellation_rules?: string | null
+  approved_claims?: string | null
+  prohibited_claims?: string | null
+  brand_use_rules?: string | null
+  geographic_customer_restrictions?: string | null
+  approved_copy?: string | null
+  marketing_links?: string[] | null
+  payment_destination_name?: string | null
+  payment_provider?: string | null
+  terms?: string | null
+  published_at?: string | null
 }
 
 export type AdminCampaign = {

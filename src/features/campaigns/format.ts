@@ -19,6 +19,46 @@ export function formatCampaignTimestamp(value: string | null | undefined): strin
 /** Integer-safe money display — aliases the shared Admin money helper. */
 export { formatAmountMinor as formatMoneyMinor } from '@/shared/lib/money'
 
+/** Campaign commercial amounts are major-unit decimals from the Admin API. */
+export function formatCampaignMoney(
+  amount: string | number | null | undefined,
+  currency: string | null | undefined = 'NGN',
+): string {
+  if (amount == null || amount === '') {
+    return '—'
+  }
+  const code = currency?.trim() || 'NGN'
+  return `${String(amount)} ${code}`
+}
+
+export function formatCampaignCommission(
+  type: string | null | undefined,
+  rate: string | number | null | undefined,
+  amount: string | number | null | undefined,
+  currency: string | null | undefined = 'NGN',
+): string {
+  if (type === 'percentage' && rate != null && rate !== '') {
+    return `${rate}%`
+  }
+  if (type === 'fixed') {
+    return formatCampaignMoney(amount, currency)
+  }
+  if (amount != null && amount !== '') {
+    return formatCampaignMoney(amount, currency)
+  }
+  if (rate != null && rate !== '') {
+    return String(rate)
+  }
+  return '—'
+}
+
+export function displayCampaignText(value: string | number | null | undefined): string {
+  if (value == null || value === '') {
+    return '—'
+  }
+  return String(value)
+}
+
 export function formatBytes(size: number | null | undefined): string {
   if (size == null || Number.isNaN(size)) {
     return '—'

@@ -1,5 +1,6 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { http, HttpResponse } from 'msw'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { AppProviders } from '@/app/providers/AppProviders'
@@ -13,8 +14,11 @@ import {
   demoExtension,
   demoFeatured,
   demoResource,
+  draftWithoutVersionCampaign,
+  sparsePublishedCampaign,
   submittedCampaign,
 } from '@/test/msw/campaignHandlers'
+import { server } from '@/test/setup'
 
 function renderApp(initialPath = '/campaigns') {
   return render(
@@ -94,10 +98,123 @@ describe('Campaign moderation queue', () => {
     const user = userEvent.setup()
     renderApp('/campaigns')
 
-    await user.click(await screen.findByRole('link', { name: 'Open campaign' }))
+    expect(await screen.findByText(submittedCampaign.title)).toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: 'Open campaign' }))
     expect(
       await screen.findByRole('heading', { name: submittedCampaign.title }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Current Campaign Version' })).toBeInTheDocument()
+  })
+})
+
+describe('Campaign commercial terms (MH-FE-015)', () => {
+  it('renders published commercial terms on active campaign detail', async () => {
+    session.user = adminUser
+    renderApp(`/campaigns/${activeCampaign.id}`)
+
+    expect(await screen.findByRole('heading', { name: activeCampaign.title })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Current Campaign Version' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Product / Pricing' })).toBeInTheDocument()
+    expect(screen.getByText('Solar street light installation kit')).toBeInTheDocument()
+    expect(
+      screen.getByText('Campus solar kit for municipal and school installs.'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('250000.00 NGN')).toBeInTheDocument()
+    expect(screen.getByText('Lagos and Ogun')).toBeInTheDocument()
+
+    expect(screen.getByRole('heading', { name: 'Commission' })).toBeInTheDocument()
+    expect(screen.getByText('10.00%')).toBeInTheDocument()
+    expect(screen.getByText('Payment Confirmation')).toBeInTheDocument()
+    expect(screen.getByText('7 days')).toBeInTheDocument()
+    expect(screen.getByText('Full kit sale completed')).toBeInTheDocument()
+
+    expect(screen.getByRole('heading', { name: 'Policies / Restrictions' })).toBeInTheDocument()
+    expect(screen.getByText('No refund after installation begins')).toBeInTheDocument()
+    expect(screen.getByText('Reliable solar lighting for campuses')).toBeInTheDocument()
+    expect(screen.getByText('Guaranteed investment returns')).toBeInTheDocument()
+    expect(screen.getByText('Use approved logo assets only')).toBeInTheDocument()
+    expect(screen.getByText('Nigeria only')).toBeInTheDocument()
+
+    expect(screen.getByRole('heading', { name: 'Marketing / Terms' })).toBeInTheDocument()
+    expect(screen.getByText('Light your campus safely with Ada Solar.')).toBeInTheDocument()
+    expect(screen.getByText('https://adasolar.test/kit')).toBeInTheDocument()
+    expect(screen.getByText('Standard partner terms apply.')).toBeInTheDocument()
+
+    expect(screen.getByRole('heading', { name: 'Payment destination' })).toBeInTheDocument()
+    expect(screen.getByText('Ada Solar Ops')).toBeInTheDocument()
+    expect(screen.getByText('bank_transfer')).toBeInTheDocument()
+
+    expect(
+      screen.queryByText('Commercial terms not available on Admin show'),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText(/not a Deal Snapshot/i)).toBeInTheDocument()
+  })
+
+  it('does not render sensitive payment fields even if present on the payload', async () => {
+    session.user = adminUser
+    const poisoned = structuredClone(activeCampaign)
+    Object.assign(poisoned.current_version!, {
+      payment_account_identifier: 'SECRET-ACCT-999',
+      payment_instructions: 'SECRET-INSTRUCTIONS',
+      payment_contact: 'SECRET-CONTACT',
+    })
+    server.use(
+      http.get(`/api/v1/admin/campaigns/${activeCampaign.id}`, () =>
+        HttpResponse.json({ success: true as const, data: poisoned }),
+      ),
+    )
+
+    renderApp(`/campaigns/${activeCampaign.id}`)
+
+    expect(await screen.findByText('Ada Solar Ops')).toBeInTheDocument()
+    expect(screen.queryByText('SECRET-ACCT-999')).not.toBeInTheDocument()
+    expect(screen.queryByText('SECRET-INSTRUCTIONS')).not.toBeInTheDocument()
+    expect(screen.queryByText('SECRET-CONTACT')).not.toBeInTheDocument()
+    expect(screen.queryByText('payment_account_identifier')).not.toBeInTheDocument()
+    expect(screen.queryByText('payment_instructions')).not.toBeInTheDocument()
+    expect(screen.queryByText('payment_contact')).not.toBeInTheDocument()
+  })
+
+  it('shows accurate empty state when current version is not published', async () => {
+    session.user = adminUser
+    renderApp(`/campaigns/${submittedCampaign.id}`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Current Campaign Version' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Published commercial terms are not available for this version/i),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Product / Pricing' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('Commercial terms not available on Admin show'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('shows accurate empty state when no current version is bound', async () => {
+    session.user = adminUser
+    renderApp(`/campaigns/${draftWithoutVersionCampaign.id}`)
+
+    expect(
+      await screen.findByRole('heading', { name: draftWithoutVersionCampaign.title }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/No current Campaign Version is attached to this campaign/i),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Product / Pricing' })).not.toBeInTheDocument()
+  })
+
+  it('renders sparse optional commercial fields without breaking', async () => {
+    session.user = adminUser
+    renderApp(`/campaigns/${sparsePublishedCampaign.id}`)
+
+    expect(
+      await screen.findByRole('heading', { name: sparsePublishedCampaign.title }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Sparse product')).toBeInTheDocument()
+    expect(screen.getByText('5.00%')).toBeInTheDocument()
+    expect(screen.getByText('Sparse Dest')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Product / Pricing' })).toBeInTheDocument()
   })
 })
 

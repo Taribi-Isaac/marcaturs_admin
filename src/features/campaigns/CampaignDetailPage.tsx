@@ -10,6 +10,7 @@ import {
 import { CAMPAIGN_QUERY_KEYS } from '@/features/campaigns/constants'
 import { formatCampaignTimestamp } from '@/features/campaigns/format'
 import { CampaignActions } from '@/features/campaigns/components/CampaignActions'
+import { CampaignCommercialTermsPanel } from '@/features/campaigns/components/CampaignCommercialTermsPanel'
 import { CampaignExtensionsPanel } from '@/features/campaigns/components/CampaignExtensionsPanel'
 import { CampaignFeaturedPanel } from '@/features/campaigns/components/CampaignFeaturedPanel'
 import { CampaignResourcesPanel } from '@/features/campaigns/components/CampaignResourcesPanel'
@@ -17,7 +18,6 @@ import {
   ErrorState,
   ForbiddenState,
   LoadingState,
-  Notice,
   NotFoundState,
   PageHeader,
   StatusBadge,
@@ -227,32 +227,7 @@ export function CampaignDetailPage() {
           </dl>
         </section>
 
-        <section className="campaign-panel campaign-panel--wide">
-          <h2>Published / current version</h2>
-          {campaign.current_version ? (
-            <dl className="campaign-dl">
-              <div>
-                <dt>Version</dt>
-                <dd>v{campaign.current_version.version_number}</dd>
-              </div>
-              <div>
-                <dt>Version status</dt>
-                <dd>{campaign.current_version.status}</dd>
-              </div>
-              <div>
-                <dt>Version ID</dt>
-                <dd>{campaign.current_version.id}</dd>
-              </div>
-            </dl>
-          ) : (
-            <p className="campaign-muted">No current version is attached to this campaign.</p>
-          )}
-          <Notice tone="info" title="Commercial terms not available on Admin show">
-            The Admin campaign show resource returns only version id, number, and status. Full
-            product, commission, claims, and payment-destination terms are not exposed on an Admin
-            versions endpoint. Those fields remain on business-facing version APIs only.
-          </Notice>
-        </section>
+        <CampaignCommercialTermsPanel version={campaign.current_version} />
       </div>
 
       <CampaignActions campaignId={campaign.id} status={campaign.status} />
