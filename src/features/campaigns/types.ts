@@ -54,6 +54,13 @@ export type AdminCampaign = {
   status: CampaignStatus
   category?: CampaignCategory | null
   current_version?: CampaignCurrentVersionSummary | null
+  cover_image?: {
+    available: boolean
+    url: string | null
+    mime_type?: string | null
+    size_bytes?: number | null
+    original_filename?: string | null
+  } | null
   listing_starts_at: string | null
   listing_expires_at: string | null
   submitted_at: string | null

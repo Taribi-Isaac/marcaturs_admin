@@ -121,6 +121,12 @@ export async function downloadCampaignResource(
   return apiDownload(`/admin/campaigns/${campaignId}/resources/${resourceId}/download`)
 }
 
+export async function downloadCampaignCover(
+  campaignId: number | string,
+): Promise<{ blob: Blob; filename: string | null }> {
+  return apiDownload(`/admin/campaigns/${campaignId}/cover/download`)
+}
+
 export async function fetchCampaignFeaturedHistory(
   id: number | string,
   signal?: AbortSignal,

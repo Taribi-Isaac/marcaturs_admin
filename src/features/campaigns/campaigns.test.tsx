@@ -225,6 +225,14 @@ describe('Campaign detail workspace', () => {
 
     expect(await screen.findByRole('heading', { name: activeCampaign.title })).toBeInTheDocument()
     expect(screen.getByText(activeCampaign.user!.name)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Campaign Cover' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('img', { name: /Cover for Active solar reseller program/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Download cover/i })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /Upload cover|Replace cover|Remove cover/i }),
+    ).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Marketing resources' })).toBeInTheDocument()
     expect(
       await screen.findByText('No marketing resources are attached to this campaign.'),

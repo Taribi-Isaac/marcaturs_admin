@@ -11,6 +11,7 @@ import { CAMPAIGN_QUERY_KEYS } from '@/features/campaigns/constants'
 import { formatCampaignTimestamp } from '@/features/campaigns/format'
 import { CampaignActions } from '@/features/campaigns/components/CampaignActions'
 import { CampaignCommercialTermsPanel } from '@/features/campaigns/components/CampaignCommercialTermsPanel'
+import { CampaignCoverPanel } from '@/features/campaigns/components/CampaignCoverPanel'
 import { CampaignExtensionsPanel } from '@/features/campaigns/components/CampaignExtensionsPanel'
 import { CampaignFeaturedPanel } from '@/features/campaigns/components/CampaignFeaturedPanel'
 import { CampaignResourcesPanel } from '@/features/campaigns/components/CampaignResourcesPanel'
@@ -228,6 +229,8 @@ export function CampaignDetailPage() {
         </section>
 
         <CampaignCommercialTermsPanel version={campaign.current_version} />
+
+        <CampaignCoverPanel campaign={campaign} />
       </div>
 
       <CampaignActions campaignId={campaign.id} status={campaign.status} />

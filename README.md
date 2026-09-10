@@ -126,6 +126,7 @@ TanStack Query: `staleTime` 30s, `refetchOnWindowFocus` true, no short-interval 
 
 - `/campaigns` moderation queue (defaults to `submitted`)
 - `/campaigns/:id` investigation workspace with moderation actions, resources, Featured and Extension inspection
+- **Campaign Cover (MH-FE-017):** read-only preview + authenticated download via Admin cover endpoints. No Admin upload/replace/delete. Cover remains separate from marketing resources and commercial terms.
 
 ## Disputes (MH-FE-007)
 

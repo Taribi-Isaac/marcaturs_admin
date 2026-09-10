@@ -146,6 +146,13 @@ export const activeCampaign: AdminCampaign = {
   created_at: '2026-07-15T11:00:00+00:00',
   updated_at: '2026-08-10T11:00:00+00:00',
   user: solarUser,
+  cover_image: {
+    available: true,
+    url: 'http://localhost/api/v1/admin/campaigns/202/cover/download',
+    mime_type: 'image/jpeg',
+    size_bytes: 20480,
+    original_filename: 'solar-cover.jpg',
+  },
 }
 
 /** Active campaign with published version but sparse optional commercial fields. */
@@ -584,6 +591,39 @@ export const campaignHandlers = [
         },
       },
     )
+  }),
+
+  http.get('/api/v1/admin/campaigns/:id/cover/download', ({ params }) => {
+    if (campaignFixtures.failDownload) {
+      return error(404, 'not_found', 'Cover file is missing from storage.')
+    }
+    const id = Number(params.id)
+    const campaign = findCampaign(id)
+    if (!campaign?.cover_image?.available) {
+      return error(404, 'not_found', 'Cover not found.')
+    }
+    return new HttpResponse(new Blob(['demo-cover'], { type: 'image/jpeg' }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/jpeg',
+        'Content-Disposition': `attachment; filename="${campaign.cover_image.original_filename ?? 'cover.jpg'}"`,
+      },
+    })
+  }),
+
+  http.get('/api/v1/admin/campaigns/:id/cover', ({ params }) => {
+    const id = Number(params.id)
+    const campaign = findCampaign(id)
+    if (!campaign) {
+      return error(404, 'not_found', 'Campaign not found.')
+    }
+    if (!campaign.cover_image?.available) {
+      return error(404, 'not_found', 'Cover not found.')
+    }
+    return ok({
+      ...campaign.cover_image,
+      url: `http://localhost/api/v1/admin/campaigns/${id}/cover/download`,
+    })
   }),
 
   http.get('/api/v1/admin/campaigns/:id/featured', ({ params }) => {
