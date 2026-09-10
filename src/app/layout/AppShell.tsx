@@ -22,7 +22,8 @@ import { useAuth } from '@/features/auth/useAuth'
 import { Button, IconButton } from '@/shared/ui'
 
 const iconById: Record<string, ReactNode> = {
-  attention: <LayoutDashboard aria-hidden="true" />,
+  overview: <LayoutDashboard aria-hidden="true" />,
+  attention: <AlertTriangle aria-hidden="true" />,
   verification: <BadgeCheck aria-hidden="true" />,
   campaigns: <Package aria-hidden="true" />,
   deals: <Handshake aria-hidden="true" />,

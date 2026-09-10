@@ -21,7 +21,7 @@ type LocationState = {
 
 function resolvePostLoginPath(from: string | undefined): string {
   if (!from || from === '/login' || from === '/forbidden') {
-    return '/attention'
+    return '/overview'
   }
   return from
 }

@@ -4,6 +4,7 @@ import { AuthGate } from '@/features/auth/AuthGate'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { ForbiddenRoutePage } from '@/features/auth/ForbiddenRoutePage'
 import { NotFoundPage } from '@/app/router/NotFoundPage'
+import { overviewRoutes } from '@/features/overview/routes'
 import { attentionRoutes } from '@/features/attention/routes'
 import { verificationRoutes } from '@/features/verification/routes'
 import { campaignsRoutes } from '@/features/campaigns/routes'
@@ -24,7 +25,8 @@ export function AppRouter() {
         {
           element: <AppShell />,
           children: [
-            { index: true, element: <Navigate to="/attention" replace /> },
+            { index: true, element: <Navigate to="/overview" replace /> },
+            ...overviewRoutes,
             ...attentionRoutes,
             ...verificationRoutes,
             ...campaignsRoutes,

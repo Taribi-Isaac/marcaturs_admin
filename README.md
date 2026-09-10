@@ -61,6 +61,51 @@ Use seeded Admin emails from `backend/docs/development-seed.md`. Do not commit c
 - Admin role gate (`role === ADMIN`)
 - Non-Admin users receive Access denied
 - Session restore on refresh via cookie + `/auth/me`
+- Post-login default destination: `/overview`
+
+## Overview (MH-FE-016)
+
+Operational command centre for Admin. Route: `/overview` (also Admin index `/`).
+
+**Authoritative data source:** `GET /api/v1/admin/overview` (MH-BE-043) only.
+
+Do **not** reconstruct aggregates by counting paginated `/admin/users`, `/admin/campaigns`, `/admin/deals`, or `/admin/disputes` lists.
+
+### Sections
+
+1. Platform snapshot (`generated_at`, `timezone`)
+2. Priority attention (`attention.*`) with drill-downs
+3. Participants (`users.*`) — BUSINESS / AMBASSADOR only
+4. Campaigns (`campaigns.by_status`, `featured_flagged`, `awaiting_admin_review`)
+5. Deals + Ambassador commission obligations (`deals.*`, `commissions.*`)
+6. Disputes + Verification (`disputes.*`, `verification.*`)
+7. Platform Payment Volume (`platform_payments.*`) — successful `status=paid` Business → MarcatursHub volume for campaign extension / featured only
+8. Quick actions to existing desks
+
+### Metric semantics
+
+- **Platform Payment Volume** ≠ ambassador commissions ≠ “company revenue”
+- Commission boundary string from API: Business → Ambassador obligation, not platform revenue
+- Open disputes ≠ Deal disputed
+- Deal ≠ Lead
+- No charts / invented percentages / infrastructure “system health”
+
+### Refresh policy
+
+TanStack Query: `staleTime` 30s, `refetchOnWindowFocus` true, no short-interval polling or WebSocket aggregation. Manual Refresh invalidates the overview query.
+
+### Drill-downs
+
+| Signal                        | Destination                          |
+| ----------------------------- | ------------------------------------ |
+| Verification awaiting review  | `/verification?status=pending`       |
+| Campaigns awaiting review     | `/campaigns?status=submitted`        |
+| Open disputes                 | `/disputes?view=actionable`          |
+| Overdue commissions           | `/deals?commission_overdue=1`        |
+| Payment-pending Deals         | `/deals?status=payment_pending`      |
+| Reported conversations        | `/moderation/reported-conversations` |
+| Participant sanctions / roles | `/users?status=` / `?role=`          |
+| Full Attention queues         | `/attention`                         |
 
 ## Attention (MH-FE-004)
 

@@ -12,12 +12,13 @@ export type NavSection = {
 }
 
 /**
- * Phase-1 Admin navigation only (MH-FE-001). Future domains stay out until APIs exist.
+ * Primary Admin navigation. Overview is the post-auth command centre (MH-FE-016).
  */
 export const primaryNavigation: NavSection[] = [
   {
     id: 'ops',
     items: [
+      { id: 'overview', label: 'Overview', to: '/overview', end: true },
       { id: 'attention', label: 'Attention', to: '/attention', end: true },
       { id: 'verification', label: 'Verification', to: '/verification' },
       { id: 'campaigns', label: 'Campaigns', to: '/campaigns' },

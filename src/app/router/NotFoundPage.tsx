@@ -9,8 +9,8 @@ export function NotFoundPage() {
       title="Page not found"
       description="That Admin route does not exist in the Phase-1 navigation."
       action={
-        <Button variant="secondary" onClick={() => navigate('/attention')}>
-          Back to Attention
+        <Button variant="secondary" onClick={() => navigate('/overview')}>
+          Back to Overview
         </Button>
       }
     />

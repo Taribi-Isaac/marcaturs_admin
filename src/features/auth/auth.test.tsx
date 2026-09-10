@@ -152,7 +152,7 @@ describe('authentication flows', () => {
     renderApp('/login')
 
     await waitFor(async () => {
-      expect(await screen.findByRole('heading', { name: 'Attention' })).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { name: 'Overview' })).toBeInTheDocument()
     })
   })
 })
