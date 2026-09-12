@@ -21,6 +21,10 @@ npm install
 npm run dev
 ```
 
+### Staging builds (ENG-040A)
+
+Copy `.env.staging.example` → `.env.staging` (untracked) and build with staging API origins. Do not commit secrets. See `../backend/docs/deployment/staging.md`.
+
 App: `http://localhost:5174` (use the `localhost` host — not `127.0.0.1` — so `SESSION_DOMAIN=localhost` cookies apply).
 
 ### API / Sanctum
