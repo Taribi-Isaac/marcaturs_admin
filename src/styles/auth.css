@@ -138,6 +138,17 @@
   font-size: var(--text-md);
 }
 
+.account-panel__permissions {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.account-panel__permissions li {
+  font-size: var(--text-sm);
+}
+
 @media (max-width: 640px) {
   .auth-screen {
     place-items: stretch;

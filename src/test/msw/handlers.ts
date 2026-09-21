@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import type { AuthUser } from '@/shared/types/auth'
+import { SUPER_ADMIN_PERMISSIONS } from '@/features/auth/permissions'
 
 export const adminUser: AuthUser = {
   id: 1,
@@ -10,6 +11,8 @@ export const adminUser: AuthUser = {
   email_verified_at: '2026-09-01T10:00:00+00:00',
   last_login_at: '2026-09-07T12:00:00+00:00',
   created_at: '2026-09-01T09:00:00+00:00',
+  staff_role: 'SUPER_ADMIN',
+  permissions: [...SUPER_ADMIN_PERMISSIONS],
 }
 
 export const businessUser: AuthUser = {
@@ -33,6 +36,10 @@ export const session: SessionState = {
 
 export function resetSession(): void {
   session.user = null
+  // Keep the shared fixture stable across tests that may assign/mutate session.user.
+  adminUser.staff_role = 'SUPER_ADMIN'
+  adminUser.status = 'active'
+  adminUser.permissions = [...SUPER_ADMIN_PERMISSIONS]
 }
 
 export const authHandlers = [

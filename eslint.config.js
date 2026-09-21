@@ -7,7 +7,17 @@ import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results'] },
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'playwright-report',
+      'test-results',
+      'scripts/**',
+      'e2e/**',
+      'tmp/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

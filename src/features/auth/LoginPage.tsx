@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/useAuth'
+import { resolvePostLoginPath } from '@/features/auth/permissions'
 import { ApiClientError } from '@/shared/api'
 import { AuthBootstrapState } from '@/features/auth/AuthBootstrapState'
 import { Button, Notice, TextField } from '@/shared/ui'
@@ -19,15 +20,8 @@ type LocationState = {
   from?: string
 }
 
-function resolvePostLoginPath(from: string | undefined): string {
-  if (!from || from === '/login' || from === '/forbidden') {
-    return '/overview'
-  }
-  return from
-}
-
 export function LoginPage() {
-  const { status, login, isBootstrapping } = useAuth()
+  const { status, user, login, isBootstrapping } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const formId = useId()
@@ -56,9 +50,9 @@ export function LoginPage() {
 
   useEffect(() => {
     if (status === 'authenticated_admin') {
-      navigate(resolvePostLoginPath(from), { replace: true })
+      navigate(resolvePostLoginPath(from, user), { replace: true })
     }
-  }, [status, from, navigate])
+  }, [status, from, user, navigate])
 
   if (isBootstrapping || status === 'unknown') {
     return <AuthBootstrapState />

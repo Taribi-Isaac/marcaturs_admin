@@ -47,4 +47,37 @@ export type VerificationSubmissionStatus = (typeof verificationSubmissionStatuse
 export const accountStatuses = ['active', 'restricted', 'suspended', 'banned'] as const
 export type AccountStatus = (typeof accountStatuses)[number]
 
+export const certificationProgrammeStatuses = [
+  'draft',
+  'published',
+  'unpublished',
+  'archived',
+] as const
+
+export type CertificationProgrammeStatus = (typeof certificationProgrammeStatuses)[number]
+
+export const certificationVersionStatuses = ['draft', 'published', 'unpublished'] as const
+export type CertificationVersionStatus = (typeof certificationVersionStatuses)[number]
+
+export const certificationArtifactStatuses = [
+  'pending_generation',
+  'generated',
+  'failed_retryable',
+] as const
+
+export type CertificationArtifactStatus = (typeof certificationArtifactStatuses)[number]
+
+export const certificationLessonContentTypes = [
+  'video',
+  'text',
+  'downloadable',
+  'external_reference',
+] as const
+
+export type CertificationLessonContentType = (typeof certificationLessonContentTypes)[number]
+
+/** Resource types mirror lesson content types in the backend enum. */
+export const certificationResourceTypes = certificationLessonContentTypes
+export type CertificationResourceType = CertificationLessonContentType
+
 export type DomainStatusTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info'

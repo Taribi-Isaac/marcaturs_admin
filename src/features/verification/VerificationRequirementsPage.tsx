@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { ApiClientError } from '@/shared/api'
+import { useAuth } from '@/features/auth/useAuth'
+import { hasPermission } from '@/features/auth/permissions'
 import {
   createVerificationRequirement,
   fetchVerificationRequirements,
@@ -44,6 +46,8 @@ const requirementSchema = z.object({
 type RequirementFormValues = z.infer<typeof requirementSchema>
 
 export function VerificationRequirementsPage() {
+  const { user } = useAuth()
+  const canConfigure = hasPermission(user, 'verification.configure')
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState<VerificationRequirement | null>(null)
   const [formOpen, setFormOpen] = useState(false)
@@ -184,25 +188,35 @@ export function VerificationRequirementsPage() {
         id: 'action',
         header: 'Action',
         align: 'right',
-        cell: (row) => (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setEditing(row)
-              setFormOpen(true)
-              setSuccessMessage(null)
-              setFormError(null)
-            }}
-          >
-            Edit
-          </Button>
-        ),
+        cell: (row) =>
+          canConfigure ? (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setEditing(row)
+                setFormOpen(true)
+                setSuccessMessage(null)
+                setFormError(null)
+              }}
+            >
+              Edit
+            </Button>
+          ) : (
+            <span className="verification-stack__secondary">View only</span>
+          ),
       },
     ],
-    [],
+    [canConfigure],
   )
 
   const forbidden = listQuery.error instanceof ApiClientError && listQuery.error.status === 403
+  const rows = listQuery.data ?? []
+  const missingActiveBusiness = !rows.some(
+    (row) => row.participant_type === 'BUSINESS' && row.is_active,
+  )
+  const missingActiveAmbassador = !rows.some(
+    (row) => row.participant_type === 'AMBASSADOR' && row.is_active,
+  )
 
   return (
     <div className="verification-page">
@@ -215,20 +229,39 @@ export function VerificationRequirementsPage() {
             <Link className="ui-button ui-button--secondary" to="/verification">
               Back to submissions
             </Link>
-            <Button
-              variant="primary"
-              onClick={() => {
-                setEditing(null)
-                setFormOpen(true)
-                setSuccessMessage(null)
-                setFormError(null)
-              }}
-            >
-              Create requirement
-            </Button>
+            {canConfigure ? (
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setEditing(null)
+                  setFormOpen(true)
+                  setSuccessMessage(null)
+                  setFormError(null)
+                }}
+              >
+                Create requirement
+              </Button>
+            ) : null}
           </div>
         }
       />
+
+      {!canConfigure ? (
+        <Notice tone="info" title="Configuration restricted">
+          Your staff role can view requirements and review submissions, but only Operations or
+          Super Admin may create or edit requirement definitions.
+        </Notice>
+      ) : null}
+
+      {canConfigure && listQuery.isSuccess && (missingActiveBusiness || missingActiveAmbassador) ? (
+        <Notice tone="warning" title="Missing active requirements">
+          {missingActiveBusiness && missingActiveAmbassador
+            ? 'No active Business or Ambassador requirements are published. Participants will see an empty verification checklist (overall status NOT_STARTED).'
+            : missingActiveBusiness
+              ? 'No active Business requirements are published. Business participants will see an empty verification checklist.'
+              : 'No active Ambassador requirements are published. Ambassador participants will see an empty verification checklist.'}
+        </Notice>
+      ) : null}
 
       {successMessage ? (
         <Notice tone="success" title="Saved">
@@ -236,7 +269,7 @@ export function VerificationRequirementsPage() {
         </Notice>
       ) : null}
 
-      {formOpen ? (
+      {formOpen && canConfigure ? (
         <section className="verification-panel" aria-labelledby={`${formId}-title`}>
           <h2 id={`${formId}-title`}>{editing ? 'Edit requirement' : 'Create requirement'}</h2>
           <form

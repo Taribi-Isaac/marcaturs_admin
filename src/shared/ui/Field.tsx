@@ -44,7 +44,10 @@ export type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   error?: string
 }
 
-export function TextField({ id, label, hint, error, className, ...props }: TextFieldProps) {
+export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
+  { id, label, hint, error, className, ...props },
+  ref,
+) {
   return (
     <FieldShell id={id} label={label} hint={hint} error={error}>
       <input
@@ -53,10 +56,11 @@ export function TextField({ id, label, hint, error, className, ...props }: TextF
         aria-invalid={Boolean(error) || undefined}
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
         {...props}
+        ref={ref}
       />
     </FieldShell>
   )
-}
+})
 
 export type TextAreaFieldProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   id: string

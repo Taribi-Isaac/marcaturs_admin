@@ -1,9 +1,13 @@
 import { Link, useSearchParams } from 'react-router-dom'
+import { useAuth } from '@/features/auth/useAuth'
+import { hasPermission } from '@/features/auth/permissions'
 import type { VerificationSubmissionStatus } from '@/shared/types/domain'
 import { VERIFICATION_STATUS_OPTIONS } from '@/features/verification/constants'
 import { FilterBar, SelectField } from '@/shared/ui'
 
 export function VerificationFilters() {
+  const { user } = useAuth()
+  const canConfigure = hasPermission(user, 'verification.configure')
   const [searchParams, setSearchParams] = useSearchParams()
   const status = (searchParams.get('status') ?? '') as '' | VerificationSubmissionStatus
 
@@ -32,11 +36,13 @@ export function VerificationFilters() {
           </option>
         ))}
       </SelectField>
-      <div className="verification-filters__actions">
-        <Link className="ui-button ui-button--secondary" to="/verification/requirements">
-          Manage requirements
-        </Link>
-      </div>
+      {canConfigure ? (
+        <div className="verification-filters__actions">
+          <Link className="ui-button ui-button--secondary" to="/verification/requirements">
+            Manage requirements
+          </Link>
+        </div>
+      ) : null}
     </FilterBar>
   )
 }

@@ -2,8 +2,10 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import {
   AlertTriangle,
+  Award,
   BadgeCheck,
   FolderTree,
+  GraduationCap,
   Handshake,
   LayoutDashboard,
   Menu,
@@ -12,6 +14,7 @@ import {
   Scale,
   Settings2,
   Sparkles,
+  UserCog,
   UserRound,
   Users,
   X,
@@ -19,6 +22,7 @@ import {
 import { primaryNavigation } from '@/app/config/navigation'
 import { appConfig } from '@/app/config/env'
 import { useAuth } from '@/features/auth/useAuth'
+import { hasPermission } from '@/features/auth/permissions'
 import { Button, IconButton } from '@/shared/ui'
 
 const iconById: Record<string, ReactNode> = {
@@ -30,6 +34,9 @@ const iconById: Record<string, ReactNode> = {
   disputes: <Scale aria-hidden="true" />,
   users: <Users aria-hidden="true" />,
   moderation: <MessageSquareWarning aria-hidden="true" />,
+  certification: <Award aria-hidden="true" />,
+  'certification-learners': <GraduationCap aria-hidden="true" />,
+  staff: <UserCog aria-hidden="true" />,
   categories: <FolderTree aria-hidden="true" />,
   'extension-packages': <Settings2 aria-hidden="true" />,
   'featured-packages': <Sparkles aria-hidden="true" />,
@@ -75,39 +82,46 @@ export function AppShell() {
         </div>
 
         <nav aria-label="Admin modules">
-          {primaryNavigation.map((section) => (
-            <div key={section.id} style={{ marginBottom: '1rem' }}>
-              {section.label ? (
-                <div
-                  style={{
-                    padding: '0.35rem 0.65rem',
-                    fontSize: '0.68rem',
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    color: 'var(--color-nav-muted)',
-                    fontWeight: 600,
-                  }}
-                >
-                  {section.label}
-                </div>
-              ) : null}
-              <ul className="app-shell__nav-list">
-                {section.items.map((item) => (
-                  <li key={item.id}>
-                    <NavLink
-                      to={item.to}
-                      end={item.end}
-                      className="app-shell__nav-link"
-                      onClick={() => setNavOpen(false)}
-                    >
-                      {iconById[item.id] ?? null}
-                      <span>{item.label}</span>
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {primaryNavigation.map((section) => {
+            const items = section.items.filter((item) => hasPermission(user, item.permission))
+            if (items.length === 0) {
+              return null
+            }
+
+            return (
+              <div key={section.id} style={{ marginBottom: '1rem' }}>
+                {section.label ? (
+                  <div
+                    style={{
+                      padding: '0.35rem 0.65rem',
+                      fontSize: '0.68rem',
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase',
+                      color: 'var(--color-nav-muted)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {section.label}
+                  </div>
+                ) : null}
+                <ul className="app-shell__nav-list">
+                  {items.map((item) => (
+                    <li key={item.id}>
+                      <NavLink
+                        to={item.to}
+                        end={item.end}
+                        className="app-shell__nav-link"
+                        onClick={() => setNavOpen(false)}
+                      >
+                        {iconById[item.id] ?? null}
+                        <span>{item.label}</span>
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
         </nav>
 
         <div className="app-shell__nav-footer">

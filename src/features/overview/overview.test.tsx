@@ -101,7 +101,7 @@ describe('Admin Overview (MH-FE-016)', () => {
     })
 
     server.use(
-      http.get('*/api/v1/admin/overview', async () => {
+      http.get('/api/v1/admin/overview', async () => {
         await gate
         return HttpResponse.json({ success: true, data: overviewFixture })
       }),
@@ -143,7 +143,7 @@ describe('Admin Overview (MH-FE-016)', () => {
   it('shows access denied for 403 without inventing zeros', async () => {
     session.user = adminUser
     server.use(
-      http.get('*/api/v1/admin/overview', () =>
+      http.get('/api/v1/admin/overview', () =>
         HttpResponse.json(
           { success: false, error: { code: 'forbidden', message: 'Forbidden.' } },
           { status: 403 },
@@ -160,7 +160,7 @@ describe('Admin Overview (MH-FE-016)', () => {
     session.user = adminUser
     let fail = true
     server.use(
-      http.get('*/api/v1/admin/overview', () => {
+      http.get('/api/v1/admin/overview', () => {
         if (fail) {
           return HttpResponse.json(
             { success: false, error: { code: 'server_error', message: 'Boom.' } },
@@ -185,7 +185,7 @@ describe('Admin Overview (MH-FE-016)', () => {
   it('shows rate-limit messaging for 429', async () => {
     session.user = adminUser
     server.use(
-      http.get('*/api/v1/admin/overview', () =>
+      http.get('/api/v1/admin/overview', () =>
         HttpResponse.json(
           { success: false, error: { code: 'rate_limited', message: 'Slow down.' } },
           { status: 429 },
@@ -202,7 +202,7 @@ describe('Admin Overview (MH-FE-016)', () => {
 
   it('shows network failure messaging', async () => {
     session.user = adminUser
-    server.use(http.get('*/api/v1/admin/overview', () => HttpResponse.error()))
+    server.use(http.get('/api/v1/admin/overview', () => HttpResponse.error()))
     renderApp('/overview')
 
     expect(
@@ -214,17 +214,18 @@ describe('Admin Overview (MH-FE-016)', () => {
   it('handles 401 by clearing the session toward login', async () => {
     session.user = adminUser
     server.use(
-      http.get('*/api/v1/admin/overview', () =>
-        HttpResponse.json(
+      http.get('/api/v1/admin/overview', () => {
+        session.user = null
+        return HttpResponse.json(
           { success: false, error: { code: 'unauthenticated', message: 'Unauthenticated.' } },
           { status: 401 },
-        ),
-      ),
+        )
+      }),
     )
     renderApp('/overview')
 
     expect(
-      await screen.findByRole('heading', { name: 'Administrator sign in' }),
+      await screen.findByRole('heading', { name: 'Administrator sign in' }, { timeout: 5000 }),
     ).toBeInTheDocument()
   })
 

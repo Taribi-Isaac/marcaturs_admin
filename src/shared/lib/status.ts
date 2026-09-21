@@ -57,6 +57,36 @@ const accountTone: Record<AccountStatus, DomainStatusTone> = {
   banned: 'danger',
 }
 
+/**
+ * Certification spans several backend enums that never collide on value:
+ * programme/version lifecycle, enrollment, attempt, award, certificate,
+ * certificate PDF artifact, and the platform payment behind an enrollment.
+ */
+const certificationTone: Record<string, DomainStatusTone> = {
+  // Programme + programme version lifecycle
+  draft: 'neutral',
+  published: 'success',
+  unpublished: 'warning',
+  archived: 'neutral',
+  // Enrollment
+  active: 'success',
+  // Assessment attempt
+  in_progress: 'info',
+  submitted: 'info',
+  // Award / certificate
+  awarded: 'success',
+  issued: 'success',
+  // Certificate PDF artifact
+  pending_generation: 'info',
+  generated: 'success',
+  failed_retryable: 'danger',
+  // Platform payment behind the enrollment
+  pending: 'info',
+  paid: 'success',
+  failed: 'danger',
+  cancelled: 'neutral',
+}
+
 const verificationOverallTone: Record<string, DomainStatusTone> = {
   not_started: 'neutral',
   pending: 'info',
@@ -74,6 +104,7 @@ export type StatusDomain =
   | 'verification_submission'
   | 'verification_overall'
   | 'account'
+  | 'certification'
 
 export function resolveStatusTone(domain: StatusDomain, status: string): DomainStatusTone {
   switch (domain) {
@@ -95,6 +126,8 @@ export function resolveStatusTone(domain: StatusDomain, status: string): DomainS
     }
     case 'account':
       return isKey(accountTone, status) ? accountTone[status] : 'neutral'
+    case 'certification':
+      return isKey(certificationTone, status) ? certificationTone[status]! : 'neutral'
     default:
       return 'neutral'
   }

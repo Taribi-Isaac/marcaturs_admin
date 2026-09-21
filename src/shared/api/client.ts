@@ -64,7 +64,10 @@ export async function apiRequestResult<T>(
   }
 
   let body: BodyInit | undefined
-  if (options.body !== undefined) {
+  if (options.body instanceof FormData) {
+    // Let fetch set the multipart boundary; Laravel needs it to parse uploads.
+    body = options.body
+  } else if (options.body !== undefined) {
     headers['Content-Type'] = 'application/json'
     body = JSON.stringify(options.body)
   }

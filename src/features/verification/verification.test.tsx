@@ -37,6 +37,21 @@ describe('Verification queue', () => {
     )
   })
 
+  it('hides manage requirements for verification staff without configure permission', async () => {
+    session.user = {
+      ...adminUser,
+      id: 32,
+      name: 'Verifier One',
+      email: 'verifier.one@demo.marcaturshub.test',
+      staff_role: 'VERIFICATION',
+      permissions: ['overview.view', 'verification.view', 'verification.review'],
+    }
+    renderApp('/verification')
+
+    expect(await screen.findByRole('heading', { name: 'Verification' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Manage requirements' })).not.toBeInTheDocument()
+  })
+
   it('shows loading then empty state', async () => {
     session.user = adminUser
     verificationFixtures.submissions = []
@@ -206,6 +221,23 @@ describe('Verification requirements', () => {
 
     expect(await screen.findByText('Requirement updated.')).toBeInTheDocument()
     expect(screen.getByText('Updated registration evidence')).toBeInTheDocument()
+  })
+
+  it('shows read-only requirements for verification staff', async () => {
+    session.user = {
+      ...adminUser,
+      id: 32,
+      name: 'Verifier One',
+      email: 'verifier.one@demo.marcaturshub.test',
+      staff_role: 'VERIFICATION',
+      permissions: ['overview.view', 'verification.view', 'verification.review'],
+    }
+    renderApp('/verification/requirements')
+
+    expect(await screen.findByText('Demo Business registration evidence')).toBeInTheDocument()
+    expect(screen.getByText(/configuration restricted/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Create requirement' })).not.toBeInTheDocument()
+    expect(screen.getAllByText('View only').length).toBeGreaterThan(0)
   })
 
   it('shows validation errors on create', async () => {

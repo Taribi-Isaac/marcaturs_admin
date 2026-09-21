@@ -40,6 +40,14 @@ export function AccountPage() {
                 <span className="mono">{user.role}</span>
               </dd>
             </div>
+            {user.staff_role != null ? (
+              <div>
+                <dt>Staff role</dt>
+                <dd>
+                  <span className="mono">{user.staff_role}</span>
+                </dd>
+              </div>
+            ) : null}
             <div>
               <dt>Account status</dt>
               <dd>
@@ -60,6 +68,20 @@ export function AccountPage() {
               <dt>Last login</dt>
               <dd>{user.last_login_at ? formatDate(user.last_login_at) : '—'}</dd>
             </div>
+            {user.permissions && user.permissions.length > 0 ? (
+              <div>
+                <dt>Permissions</dt>
+                <dd>
+                  <ul className="account-panel__permissions">
+                    {user.permissions.map((permission) => (
+                      <li key={permission}>
+                        <span className="mono">{permission}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            ) : null}
           </dl>
           <Divider />
           <Notice tone="info" title="Session">

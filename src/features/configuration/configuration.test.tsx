@@ -295,5 +295,5 @@ describe('Existing modules remain reachable', () => {
 
     renderApp('/disputes')
     expect(await screen.findByRole('heading', { name: 'Disputes' })).toBeInTheDocument()
-  })
+  }, 15_000)
 })

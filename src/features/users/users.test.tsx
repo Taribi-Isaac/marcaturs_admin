@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
@@ -242,7 +242,9 @@ describe('Admin Users status actions', () => {
     const dialog = await screen.findByRole('dialog')
     expect(within(dialog).getByText(/Ada Solar/)).toBeInTheDocument()
     expect(within(dialog).getByText(/Resulting status/i)).toBeInTheDocument()
-    expect(dialog.contains(document.activeElement)).toBe(true)
+    await waitFor(() => {
+      expect(dialog.contains(document.activeElement)).toBe(true)
+    })
 
     await user.click(within(dialog).getByRole('button', { name: 'Restrict' }))
     expect(await within(dialog).findByText(/at least 3 characters/i)).toBeInTheDocument()
