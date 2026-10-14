@@ -1,30 +1,53 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { triggerBrowserDownload } from '@/shared/api'
 import { downloadCampaignCover } from '@/features/campaigns/api'
 import type { AdminCampaign } from '@/features/campaigns/types'
 import { Button } from '@/shared/ui'
 
-function coverSrc(url: string | null | undefined): string | null {
-  if (!url) return null
-  try {
-    const parsed = new URL(url, window.location.origin)
-    const marker = '/api/v1/'
-    const idx = parsed.pathname.indexOf(marker)
-    if (idx >= 0) {
-      return `${parsed.pathname.slice(idx)}${parsed.search}`
-    }
-  } catch {
-    // keep
-  }
-  return url
-}
+type Preview = { key: string; src: string | null }
 
 export function CampaignCoverPanel({ campaign }: { campaign: AdminCampaign }) {
   const cover = campaign.cover_image
   const available = Boolean(cover?.available && cover.url)
   const [downloadError, setDownloadError] = useState<string | null>(null)
   const [downloading, setDownloading] = useState(false)
-  const src = available ? coverSrc(cover?.url) : null
+  const [preview, setPreview] = useState<Preview | null>(null)
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null)
+
+  // Admin cover streams are origin-bound: a plain <img> request carries no Origin header and is
+  // rejected, so the thumbnail is fetched through the authenticated API client instead.
+  const previewKey = available
+    ? [campaign.id, cover?.mime_type, cover?.size_bytes, cover?.original_filename].join('|')
+    : null
+
+  useEffect(() => {
+    if (!previewKey) return
+
+    const controller = new AbortController()
+    let objectUrl: string | null = null
+
+    downloadCampaignCover(campaign.id, controller.signal)
+      .then(({ blob }) => {
+        if (controller.signal.aborted) return
+        if (!blob.type.toLowerCase().startsWith('image/')) {
+          setPreview({ key: previewKey, src: null })
+          return
+        }
+        objectUrl = URL.createObjectURL(blob)
+        setPreview({ key: previewKey, src: objectUrl })
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setPreview({ key: previewKey, src: null })
+      })
+
+    return () => {
+      controller.abort()
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [campaign.id, previewKey])
+
+  const current = preview && preview.key === previewKey ? preview : null
+  const thumbnail = current?.src && current.src !== brokenSrc ? current.src : null
 
   async function handleDownload() {
     setDownloadError(null)
@@ -49,13 +72,20 @@ export function CampaignCoverPanel({ campaign }: { campaign: AdminCampaign }) {
         Read-only presentation image. Admin cannot upload, replace, or delete covers.
       </p>
 
-      {available && src ? (
+      {available ? (
         <div className="campaign-cover-admin">
-          <img
-            src={src}
-            alt={`Cover for ${campaign.title}`}
-            className="campaign-cover-admin__img"
-          />
+          {thumbnail ? (
+            <img
+              src={thumbnail}
+              alt={`Cover for ${campaign.title}`}
+              className="campaign-cover-admin__img"
+              onError={() => setBrokenSrc(thumbnail)}
+            />
+          ) : (
+            <p className="campaign-muted">
+              {current ? 'Cover preview unavailable.' : 'Loading cover preview…'}
+            </p>
+          )}
           <dl className="campaign-dl">
             {cover?.original_filename ? (
               <div>
