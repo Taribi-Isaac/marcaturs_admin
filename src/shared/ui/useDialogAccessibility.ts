@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -34,6 +34,16 @@ export function useDialogAccessibility({
   onEscape,
   escapeEnabled = true,
 }: UseDialogAccessibilityOptions): void {
+  // Callers pass inline callbacks and toggle escapeEnabled while submitting. Reading them
+  // through refs keeps those re-renders from re-running the open/close focus lifecycle,
+  // which would pull focus out of the dialog mid-interaction.
+  const onEscapeRef = useRef(onEscape)
+  const escapeEnabledRef = useRef(escapeEnabled)
+  useEffect(() => {
+    onEscapeRef.current = onEscape
+    escapeEnabledRef.current = escapeEnabled
+  })
+
   useEffect(() => {
     if (!open) {
       return
@@ -42,18 +52,15 @@ export function useDialogAccessibility({
     const previous = document.activeElement
     const container = containerRef.current
 
-    const focusInitial = () => {
-      const target = initialFocusRef?.current ?? getFocusable(container ?? document.body)[0]
-      target?.focus()
-    }
-
-    // Defer one frame so dialog content is mounted.
-    const frame = window.requestAnimationFrame(focusInitial)
+    // Focus synchronously: the dialog is committed before effects run, and a deferred
+    // focus can land after the user has started typing into another field.
+    const target = initialFocusRef?.current ?? getFocusable(container ?? document.body)[0]
+    target?.focus()
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && escapeEnabled) {
+      if (event.key === 'Escape' && escapeEnabledRef.current) {
         event.preventDefault()
-        onEscape?.()
+        onEscapeRef.current?.()
         return
       }
 
@@ -87,11 +94,10 @@ export function useDialogAccessibility({
 
     document.addEventListener('keydown', onKeyDown)
     return () => {
-      window.cancelAnimationFrame(frame)
       document.removeEventListener('keydown', onKeyDown)
       if (previous instanceof HTMLElement) {
         previous.focus()
       }
     }
-  }, [open, containerRef, initialFocusRef, onEscape, escapeEnabled])
+  }, [open, containerRef, initialFocusRef])
 }
