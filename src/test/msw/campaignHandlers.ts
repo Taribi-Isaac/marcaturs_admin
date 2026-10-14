@@ -602,7 +602,7 @@ export const campaignHandlers = [
     if (!campaign?.cover_image?.available) {
       return error(404, 'not_found', 'Cover not found.')
     }
-    return new HttpResponse(new Blob(['demo-cover'], { type: 'image/jpeg' }), {
+    return new HttpResponse('demo-cover', {
       status: 200,
       headers: {
         'Content-Type': 'image/jpeg',
