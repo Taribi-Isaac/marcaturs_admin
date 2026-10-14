@@ -227,7 +227,7 @@ describe('Campaign detail workspace', () => {
     expect(screen.getByText(activeCampaign.user!.name)).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Campaign Cover' })).toBeInTheDocument()
     expect(
-      screen.getByRole('img', { name: /Cover for Active solar reseller program/i }),
+      await screen.findByRole('img', { name: /Cover for Active solar reseller program/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Download cover/i })).toBeInTheDocument()
     expect(
