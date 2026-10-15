@@ -118,8 +118,6 @@ export const authHandlers = [
         success: true,
         data: {
           user: adminUser,
-          token: 'test-token-admin',
-          token_type: 'Bearer',
         },
       })
     }
@@ -130,8 +128,6 @@ export const authHandlers = [
         success: true,
         data: {
           user: businessUser,
-          token: 'test-token-business',
-          token_type: 'Bearer',
         },
       })
     }

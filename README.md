@@ -38,6 +38,8 @@ VITE_BACKEND_ORIGIN=http://localhost:8000
 
 Vite proxies `/api` and `/sanctum` to the Laravel origin and rewrites `Origin`/`Referer` to `http://localhost:3000` (already listed in backend `SANCTUM_STATEFUL_DOMAINS`) so SPA session middleware applies without changing backend env. The SPA calls `GET /sanctum/csrf-cookie` before mutating requests and sends `X-XSRF-TOKEN`.
 
+The backend binds `/api/v1/admin/*` browser requests to the Admin origin (`ADMIN_ALLOWED_ORIGINS`, defaulting to `ADMIN_FRONTEND_URL`). Locally, leave both unset (no binding outside production) or include `http://localhost:3000`, because that is the `Origin` the proxy sends; otherwise Admin endpoints return `403`.
+
 Start the backend separately (`php artisan serve`) and seed demo data:
 
 ```bash
@@ -62,6 +64,8 @@ Use seeded Admin emails from `backend/docs/development-seed.md`. Do not commit c
 ## Auth (MH-FE-003)
 
 - Login / logout / `/auth/me` against Laravel
+- Cookie session only: `POST /auth/login` returns `{ user }` to the browser — no bearer token is issued, stored, or sent
+- `/auth/me` is the session authority after login (the login payload is not trusted for the role gate)
 - Admin role gate (`role === ADMIN`)
 - Non-Admin users receive Access denied
 - Session restore on refresh via cookie + `/auth/me`

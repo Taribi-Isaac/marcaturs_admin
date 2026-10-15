@@ -28,8 +28,10 @@ export type LoginPayload = {
   password: string
 }
 
+/**
+ * Browser login authenticates through the Sanctum session cookie; the API does
+ * not issue a personal access token to the SPA, so there is no `token` here.
+ */
 export type LoginResult = {
   user: AuthUser
-  token: string
-  token_type: 'Bearer'
 }
