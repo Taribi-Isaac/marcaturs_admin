@@ -1,4 +1,5 @@
 import { PageHeader, Notice, Button, StatusBadge, Divider } from '@/shared/ui'
+import { ChangePasswordForm } from '@/features/account/ChangePasswordForm'
 import { useAuth } from '@/features/auth/useAuth'
 import { formatStatusLabel } from '@/shared/lib/status'
 
@@ -84,10 +85,11 @@ export function AccountPage() {
             ) : null}
           </dl>
           <Divider />
+          <ChangePasswordForm />
           <Notice tone="info" title="Session">
             Authentication uses the Laravel Sanctum session established against the MarcatursHub
-            API. Password reset and email verification screens are not part of this Admin console
-            yet.
+            API. Forgotten-password recovery and email verification screens are not part of this
+            Admin console yet.
           </Notice>
         </div>
       ) : (

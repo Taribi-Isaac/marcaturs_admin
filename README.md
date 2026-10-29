@@ -34,7 +34,10 @@ Local development uses a **Vite proxy** so Sanctum cookies stay same-origin:
 ```text
 VITE_API_BASE_URL=/api/v1
 VITE_BACKEND_ORIGIN=http://localhost:8000
+VITE_FRONTEND_URL=http://localhost:5180
 ```
+
+`VITE_FRONTEND_URL` is the public participant origin and must match backend `FRONTEND_URL`. Admin login uses it for **Forgot password?**. It is not a secret. If it is missing or not an absolute http(s) origin, the link is omitted.
 
 Vite proxies `/api` and `/sanctum` to the Laravel origin and rewrites `Origin`/`Referer` to `http://localhost:3000` (already listed in backend `SANCTUM_STATEFUL_DOMAINS`) so SPA session middleware applies without changing backend env. The SPA calls `GET /sanctum/csrf-cookie` before mutating requests and sends `X-XSRF-TOKEN`.
 

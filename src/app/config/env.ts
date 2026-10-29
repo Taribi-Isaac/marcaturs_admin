@@ -1,3 +1,36 @@
+/**
+ * Participant recovery page. `VITE_FRONTEND_URL` must be the same public origin
+ * as the backend `FRONTEND_URL` used in reset emails. An empty or invalid value
+ * yields no link rather than a guessed host.
+ */
+export function resolveForgotPasswordUrl(raw: string | undefined): string | null {
+  const value = raw?.trim()
+  if (!value) {
+    return null
+  }
+
+  let url: URL
+  try {
+    url = new URL(value)
+  } catch {
+    return null
+  }
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return null
+  }
+
+  if (url.username || url.password || url.search || url.hash) {
+    return null
+  }
+
+  if (url.pathname !== '/' && url.pathname !== '') {
+    return null
+  }
+
+  return `${url.origin}/forgot-password`
+}
+
 export const appConfig = {
   appName: 'MarcatursHub Admin',
   /**
@@ -9,6 +42,7 @@ export const appConfig = {
    * Absolute origin used only by the Vite proxy (never sent to the browser as secrets).
    */
   backendOrigin: import.meta.env.VITE_BACKEND_ORIGIN ?? 'http://localhost:8000',
+  forgotPasswordUrl: resolveForgotPasswordUrl(import.meta.env.VITE_FRONTEND_URL),
 } as const
 
 /** Origin used for non-API Sanctum routes such as `/sanctum/csrf-cookie`. */

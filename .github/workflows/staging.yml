@@ -30,6 +30,7 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://api.staging.example.com/api/v1' }}
           VITE_BACKEND_ORIGIN: ${{ vars.VITE_BACKEND_ORIGIN || 'https://api.staging.example.com' }}
+          VITE_FRONTEND_URL: ${{ vars.VITE_FRONTEND_URL }}
       - uses: actions/upload-artifact@v4
         with:
           name: admin-dist

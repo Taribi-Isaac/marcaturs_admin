@@ -23,3 +23,18 @@ export async function logoutRequest(): Promise<null> {
     notifyOnUnauthorized: false,
   })
 }
+
+export type ChangePasswordPayload = {
+  current_password: string
+  password: string
+  password_confirmation: string
+}
+
+export async function changePasswordRequest(
+  payload: ChangePasswordPayload,
+): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>('/auth/change-password', {
+    method: 'POST',
+    body: payload,
+  })
+}
