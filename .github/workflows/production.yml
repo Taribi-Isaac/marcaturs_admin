@@ -13,7 +13,7 @@ name: Production
 #
 # Environment "production" must define:
 #   secrets: CLOUDFLARE_API_TOKEN (Pages:Edit only), CLOUDFLARE_ACCOUNT_ID
-#   vars:    CF_PAGES_PROJECT, VITE_API_BASE_URL, VITE_BACKEND_ORIGIN
+#   vars:    CF_PAGES_PROJECT, VITE_API_BASE_URL, VITE_BACKEND_ORIGIN, VITE_FRONTEND_URL
 #
 # VITE_API_BASE_URL must be absolute: the CSRF cookie origin and every API call
 # derive from it, and Pages does not proxy /api.
@@ -54,6 +54,7 @@ jobs:
       CF_PAGES_PROJECT: ${{ vars.CF_PAGES_PROJECT }}
       VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
       VITE_BACKEND_ORIGIN: ${{ vars.VITE_BACKEND_ORIGIN }}
+      VITE_FRONTEND_URL: ${{ vars.VITE_FRONTEND_URL }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -91,6 +92,7 @@ jobs:
           }
           check VITE_API_BASE_URL '^https://[A-Za-z0-9.-]+(/[A-Za-z0-9._~-]+)+$' "an absolute production https:// API URL"
           check VITE_BACKEND_ORIGIN '^https://[A-Za-z0-9.-]+$' "a production https:// origin without a path"
+          check VITE_FRONTEND_URL '^https://[A-Za-z0-9.-]+$' "a production https:// origin without a path"
           exit "$fail"
 
       - run: npm ci

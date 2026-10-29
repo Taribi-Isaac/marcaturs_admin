@@ -149,6 +149,44 @@
   font-size: var(--text-sm);
 }
 
+.account-security {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 28rem;
+}
+
+.account-security__title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.account-security__lede {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.account-security__form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.account-security__form .field__control {
+  width: 100%;
+}
+
+.account-security__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .account-security {
+    max-width: none;
+  }
+}
+
 @media (max-width: 640px) {
   .auth-screen {
     place-items: stretch;

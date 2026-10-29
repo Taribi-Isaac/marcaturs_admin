@@ -27,6 +27,13 @@ async function signInAs(email: string, password = 'DemoPass123!') {
 }
 
 describe('authentication flows', () => {
+  it('links forgotten-password recovery to the participant app', async () => {
+    renderApp('/login')
+
+    const link = await screen.findByRole('link', { name: 'Forgot password?' })
+    expect(link).toHaveAttribute('href', 'http://localhost:5180/forgot-password')
+  })
+
   it('starts unauthenticated and redirects protected routes to login', async () => {
     renderApp('/campaigns')
 

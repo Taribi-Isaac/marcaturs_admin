@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/useAuth'
 import { resolvePostLoginPath } from '@/features/auth/permissions'
+import { appConfig } from '@/app/config/env'
 import { ApiClientError } from '@/shared/api'
 import { AuthBootstrapState } from '@/features/auth/AuthBootstrapState'
 import { Button, Notice, TextField } from '@/shared/ui'
@@ -162,6 +163,11 @@ export function LoginPage() {
             error={errors.password?.message}
             {...register('password')}
           />
+          {appConfig.forgotPasswordUrl ? (
+            <a className="auth-screen__quiet-link" href={appConfig.forgotPasswordUrl}>
+              Forgot password?
+            </a>
+          ) : null}
           <Button
             type="submit"
             variant="primary"

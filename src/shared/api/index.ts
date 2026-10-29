@@ -10,6 +10,12 @@ export type {
 export { ApiClientError, mapHttpStatusToCode } from './errors'
 export { ensureCsrfCookie, readXsrfToken } from './csrf'
 export { onUnauthorized, notifyUnauthorized } from './sessionEvents'
-export { fetchCurrentUser, loginRequest, logoutRequest } from './authApi'
+export {
+  fetchCurrentUser,
+  loginRequest,
+  logoutRequest,
+  changePasswordRequest,
+} from './authApi'
+export type { ChangePasswordPayload } from './authApi'
 export { apiDownload, triggerBrowserDownload } from './download'
 export type { DownloadResult } from './download'
